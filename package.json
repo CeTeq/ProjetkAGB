@@ -1,10 +1,19 @@
 {
-  "name": "ProjetkAGB",
+  "name": "logintest",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "private": true
+  "type": "module",
+  "private": true,
+  "author": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.9.1",
+    "body-parser": "^2.2.0",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  },
+  "description": ""
 }

@@ -1,0 +1,136 @@
+import express from 'express';
+import bodyParser from 'body-parser';
+import Database from 'better-sqlite3';
+import bcrypt from 'bcrypt';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import session from 'express-session';
+
+const app = express();
+const port = 3000;
+const db = new Database('users.db', { verbose: console.log });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true
+}));
+
+const stmt = db.prepare("select * from users where username = 'admin'");
+console.log(stmt.get());
+
+function isAuthenticated(req, res, next) {
+    if (req.session.user) next();
+    else next('route');
+}
+
+app.get('/', isAuthenticated, function (req, res) {
+    const filePath = path.resolve('./public/user.html');
+    res.sendFile(filePath);
+});
+
+app.get('/', function (req, res) {
+    const filePath = path.resolve('./public/index.html');
+    res.sendFile(filePath);
+});
+
+app.post('/login', async function (req, res) {
+    getUserData('users', req.body.user)
+        .then(result => {
+            const user = result;
+
+            if (user) {
+                isPasswordCorrect(req.body.pass, user.password)
+                    .then(result => {
+                        if (!result) res.redirect('/?err=wrongpassword');
+                        else {
+                            req.session.regenerate(function (err) {
+                                if (err) next(err);
+
+                                req.session.user = req.body.user;
+
+                                req.session.save(function (err) {
+                                    if (err) return next(err);
+                                    res.redirect('/');
+                                });
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.redirect('/?err=wrongpassword');
+                    });
+            } else res.redirect('/?err=wrongpassword');
+        });
+});
+
+app.post('/register', function (req, res) {
+    bcrypt.genSalt(10, async function (err, salt) {
+        await bcrypt.hash(req.body.pass, salt, function (err, hash) {
+            const dsa = db.prepare("select * from users where username = (?)");
+            if (dsa.get(req.body.user) === undefined) {
+                const stmt = db.prepare('INSERT INTO users (username, password, salt) VALUES (?,?,?)');
+                console.log(stmt.run(req.body.user, hash, salt));
+
+                req.session.regenerate(function (err) {
+                    if (err) next(err);
+
+                    req.session.user = req.body.user;
+
+                    req.session.save(function (err) {
+                        if (err) return next(err);
+                        res.redirect('/');
+                    });
+                });
+            } else res.redirect('/');
+        });
+    });
+});
+
+app.get('/logout', function (req, res, next) {
+    req.session.user = null;
+    req.session.save(function (err) {
+        if (err) next(err);
+
+        req.session.regenerate(function (err) {
+            if (err) next(err);
+            res.redirect('/');
+        });
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
+
+async function getUserData(tableName, username) {
+    return new Promise((resolve, reject) => {
+        const stmt = db.prepare("select * from users where username = (?)");
+        resolve(stmt.get(username));
+    });
+}
+
+function isPasswordCorrect(password, hash) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(password, hash, (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+        });
+    });
+}
+
+app.get('/project', isAuthenticated, async function (req, res) {
+    const stmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = ? AND project_id = ?");
+    const perms = stmt.all(1, req.query.id);
+
+    if (perms[0].permission !== 0) {
+        const stmt = db.prepare("select * from Project where id = (?)");
+        const project = stmt.get(req.query.id);
+        res.send('<h1>Welcome</h1>');
+    } else res.redirect('/?err=noPermissions');
+});

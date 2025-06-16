@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const myParam = urlParams.get('err');
+            console.log(myParam);
+            const error = document.getElementById('error');
+            if (myParam === "noPermissions") {
+                error.innerHTML = "You do not have permission to access this page!";
+            }
+        });
+    </script>
+</head>
+<body>
+Hello!
+<a href="/logout">Logout</a><br><a href="/project?id=1">Projekt</a>
+<div id="error" style="color: red"></div>
+</body>
+</html>
