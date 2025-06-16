@@ -139,7 +139,7 @@ app.get('/project', isAuthenticated, async function (req, res) {
 app.get('/magazyn', (req, res) => {
     let rows
     let table
-    db.all("SELECT Nazwa_Produktu, Cena_Produktu, Znacznik_Produktu FROM Produkty", function(err, allRows) {
+    db.all("SELECT nazwa, cena, znacznik FROM produkty", function(err, allRows) {
 
         if(err != null){
             console.log(err);
