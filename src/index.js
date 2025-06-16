@@ -5,10 +5,11 @@ import bcrypt from 'bcrypt';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import session from 'express-session';
+import {pricingList} from "./pricingList.js";
 
-const app = express();
+export const app = express();
 const port = 3000;
-const db = new Database('users.db', { verbose: console.log });
+export const db = new Database('users.db', { verbose: console.log });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -134,3 +135,22 @@ app.get('/project', isAuthenticated, async function (req, res) {
         res.send('<h1>Welcome</h1>');
     } else res.redirect('/?err=noPermissions');
 });
+
+app.get('/magazyn', (req, res) => {
+    let rows
+    let table
+    db.all("SELECT Nazwa_Produktu, Cena_Produktu, Znacznik_Produktu FROM Produkty", function(err, allRows) {
+
+        if(err != null){
+            console.log(err);
+            console.log(err);
+        }
+        rows = allRows
+        table = "<table><tr><th>Nazwa produktu</th><th>Ilość</th><th>Cena</th></tr>"
+        rows.forEach((element)=>{
+            table+= '<tr><td>' + element.Nazwa_produktu + '</td><td class="cent">' + element.Znacznik_produktu + '</td><td class="cent">' + element.Cena_produktu * element.Ilość_produktu + 'zł' + '</td></tr>'
+        })
+        table += '</table>'
+        res.send(table)
+    });
+})
