@@ -5,7 +5,9 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
     <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -20,7 +22,33 @@
 </head>
 <body>
 Hello!
-<a href="/logout">Logout</a><br><a href="/project?id=1">Projekt</a>
 <div id="error" style="color: red"></div>
+<div id="projects"></div>
+<script>
+    const table = document.getElementById('projects');
+
+    async function getData() {
+        const url = "/api/getProjects"
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const json = await response.json();
+            console.log(json);
+            let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
+            json.forEach(element => {
+                projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="project?id='+ element.id + '">Otwórz</a></td></tr>'
+            })
+            table.innerHTML = projects + '</table>'
+
+        } catch (error) {
+            console.error(error.message);
+        }
+
+    }
+    getData();
+</script>
 </body>
 </html>
