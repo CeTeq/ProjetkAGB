@@ -5,7 +5,8 @@ import bcrypt from 'bcrypt';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import session from 'express-session';
-import {pricingList} from "./pricingList.js";
+// import {pricingList} from "./pricingList.js";
+// import {all} from "express/lib/application.js";
 
 export const app = express();
 const port = 3000;
@@ -21,23 +22,27 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+app.use(express.static('public'))
+
 
 const stmt = db.prepare("select * from users where username = 'admin'");
 console.log(stmt.get());
 
 function isAuthenticated(req, res, next) {
-    if (req.session.user) next();
+    if (req.session.user && req.session.userID) next();
     else next('route');
 }
 
 app.get('/', isAuthenticated, function (req, res) {
-    const filePath = path.resolve('./public/user.html');
-    res.sendFile(filePath);
+    // const filePath = path.resolve('./public/user.html');
+    // res.sendFile(filePath);
+    res.redirect('/user.html')
 });
 
 app.get('/', function (req, res) {
-    const filePath = path.resolve('./public/index.html');
-    res.sendFile(filePath);
+    // const filePath = path.resolve('./public/index.html');
+    // res.sendFile(filePath);
+    res.redirect('/login.html')
 });
 
 app.post('/login', async function (req, res) {
@@ -54,6 +59,8 @@ app.post('/login', async function (req, res) {
                                 if (err) next(err);
 
                                 req.session.user = req.body.user;
+                                console.log('result: ', user.id);
+                                req.session.userID = user.id;
 
                                 req.session.save(function (err) {
                                     if (err) return next(err);
@@ -75,8 +82,11 @@ app.post('/register', function (req, res) {
         await bcrypt.hash(req.body.pass, salt, function (err, hash) {
             const dsa = db.prepare("select * from users where username = (?)");
             if (dsa.get(req.body.user) === undefined) {
-                const stmt = db.prepare('INSERT INTO users (username, password, salt) VALUES (?,?,?)');
+                let stmt = db.prepare('INSERT INTO users (username, password, salt) VALUES (?,?,?)');
                 console.log(stmt.run(req.body.user, hash, salt));
+                stmt = db.prepare("select MAX(id) as id from users")
+
+                console.log('register id: ', stmt.get())
 
                 req.session.regenerate(function (err) {
                     if (err) next(err);
@@ -133,6 +143,7 @@ app.get('/project', isAuthenticated, async function (req, res) {
         const stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
         res.send('<h1>Welcome</h1>');
+        console.log('req session user: ', req.session.userID)
     } else res.redirect('/?err=noPermissions');
 });
 
@@ -153,4 +164,9 @@ app.get('/magazyn', (req, res) => {
         table += '</table>'
         res.send(table)
     });
+})
+app.get('/api/getProjects', isAuthenticated, (req, res) => {
+    console.log(req)
+    let stmt = db.prepare("select project.id, project.name, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0");
+    res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
