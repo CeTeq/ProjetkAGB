@@ -13,7 +13,6 @@ const port = 3000;
 export const db = new Database('users.db', { verbose: console.log });
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,6 +21,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+const allowedURLs = ['/login.html', '/login.css']
+app.use((req, res, next) => {
+    if (allowedURLs.includes(req.path) || (req.session.user && req.session.userID)) next();
+    else {
+        console.log('baseurl: ', req.path);
+        res.redirect('/login.html')
+    }
+})
 app.use(express.static('public'))
 
 
