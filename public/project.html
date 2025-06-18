@@ -1,16 +1,40 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title></title>
-    <script defer>
-        
-    </script>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <title>Projekt</title>
 </head>
 <body>
+<div id="title"></div>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('id');
+    console.log(myParam)
+    async function getData() {
+        const url = "/api/project?id=" + myParam;
+        console.log(url);
+        try {
+            console.log('test')
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
 
+            const json = await response.json();
+            console.log(json);
+            document.title = json.name;
+            document.getElementById("title").innerHTML ='<h1>' + json.name + '</h1>';
+
+        } catch (error) {
+            console.error(error.message);
+        }
+
+    }
+    getData();
+</script>
 </body>
 </html>

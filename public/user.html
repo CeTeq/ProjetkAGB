@@ -8,23 +8,22 @@
 
     <title>Document</title>
     <link rel="stylesheet" href="./style.css">
-    <script defer>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const myParam = urlParams.get('err');
-            console.log(myParam);
-            const error = document.getElementById('error');
-            if (myParam === "noPermissions") {
-                error.innerHTML = "You do not have permission to access this page!";
-            }
-        });
-    </script>
 </head>
 <body>
-Hello!
+<span id="greeting"></span>
 <div id="error" style="color: red"></div>
 <div id="projects"></div>
 <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('err');
+    const username = urlParams.get('username');
+    console.log(username);
+    console.log(myParam);
+    const error = document.getElementById('error');
+    if (myParam === "noPermissions") {error.innerHTML = "You do not have permission to access this page!";
+    }
+    if (username) document.getElementById('greeting').innerText = "Hello " + username + "!";
+
     const table = document.getElementById('projects');
 
     async function getData() {
@@ -39,7 +38,7 @@ Hello!
             console.log(json);
             let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
             json.forEach(element => {
-                projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="project?id='+ element.id + '">Otwórz</a></td></tr>'
+                projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="/project.html?id='+ element.id + '">Otwórz</a></td></tr>'
             })
             table.innerHTML = projects + '</table>'
 

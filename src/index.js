@@ -21,19 +21,15 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
-const allowedURLs = ['/login.html', '/login.css']
+const allowedURLs = ['/login.html', '/login.css', '/style.css']
 app.use((req, res, next) => {
-    if (allowedURLs.includes(req.path) || (req.session.user && req.session.userID)) next();
+    if ((allowedURLs.includes(req.path) || req.path.startsWith('/api') )|| (req.session.user && req.session.userID)) next();
     else {
         console.log('baseurl: ', req.path);
         res.redirect('/login.html')
     }
 })
 app.use(express.static('public'))
-
-
-const stmt = db.prepare("select * from users where username = 'admin'");
-console.log(stmt.get());
 
 function isAuthenticated(req, res, next) {
     if (req.session.user && req.session.userID) next();
@@ -43,7 +39,7 @@ function isAuthenticated(req, res, next) {
 app.get('/', isAuthenticated, function (req, res) {
     // const filePath = path.resolve('./public/user.html');
     // res.sendFile(filePath);
-    res.redirect('/user.html')
+    res.redirect('/user.html?username=' + req.session.user);
 });
 
 app.get('/', function (req, res) {
@@ -52,7 +48,7 @@ app.get('/', function (req, res) {
     res.redirect('/login.html')
 });
 
-app.post('/login', async function (req, res) {
+app.post('/api/login', async function (req, res) {
     getUserData('users', req.body.user)
         .then(result => {
             const user = result;
@@ -66,7 +62,6 @@ app.post('/login', async function (req, res) {
                                 if (err) next(err);
 
                                 req.session.user = req.body.user;
-                                console.log('result: ', user.id);
                                 req.session.userID = user.id;
 
                                 req.session.save(function (err) {
@@ -84,17 +79,13 @@ app.post('/login', async function (req, res) {
         });
 });
 
-app.post('/register', function (req, res) {
+app.post('/api/register', function (req, res) {
     bcrypt.genSalt(10, async function (err, salt) {
         await bcrypt.hash(req.body.pass, salt, function (err, hash) {
             const dsa = db.prepare("select * from users where username = (?)");
             if (dsa.get(req.body.user) === undefined) {
                 let stmt = db.prepare('INSERT INTO users (username, password, salt) VALUES (?,?,?)');
-                console.log(stmt.run(req.body.user, hash, salt));
                 stmt = db.prepare("select MAX(id) as id from users")
-
-                console.log('register id: ', stmt.get())
-
                 req.session.regenerate(function (err) {
                     if (err) next(err);
 
@@ -110,7 +101,7 @@ app.post('/register', function (req, res) {
     });
 });
 
-app.get('/logout', function (req, res, next) {
+app.get('/api/logout', function (req, res, next) {
     req.session.user = null;
     req.session.save(function (err) {
         if (err) next(err);
@@ -142,25 +133,31 @@ function isPasswordCorrect(password, hash) {
     });
 }
 
-app.get('/project', isAuthenticated, async function (req, res) {
+app.get('/api/project', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = ? AND project_id = ?");
-    const perms = stmt.all(1, req.query.id);
+    const perms = stmt.get(1, req.query.id);
 
-    if (perms[0].permission !== 0) {
-        const stmt = db.prepare("select * from Project where id = (?)");
+    if (perms.permission !== 0) {
+        let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
-        res.send('<h1>Welcome</h1>');
-        console.log('req session user: ', req.session.userID)
+        stmt = db.prepare('select products.id, products.name, products.mark, products.price, products.currency from `products` inner join `projects_products` on projects_products.product_id = products.id inner join `Project` on projects_products.project_id = Project.id where project.id = (?)');
+        const items = stmt.get(req.query.id)
+        console.log('items: ', items)
+        if(perms.permission > 0){
+            res.json({
+                id: project.id,
+                name: project.name
+            })
+            console.log(res)
+        }
     } else res.redirect('/?err=noPermissions');
 });
 
-app.get('/magazyn', (req, res) => {
+app.get('/api/magazyn', (req, res) => {
     let rows
     let table
     db.all("SELECT nazwa, cena, znacznik FROM produkty", function(err, allRows) {
-
         if(err != null){
-            console.log(err);
             console.log(err);
         }
         rows = allRows
@@ -173,7 +170,6 @@ app.get('/magazyn', (req, res) => {
     });
 })
 app.get('/api/getProjects', isAuthenticated, (req, res) => {
-    console.log(req)
     let stmt = db.prepare("select project.id, project.name, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0");
     res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
