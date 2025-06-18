@@ -6,10 +6,8 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="login.css" type="text/css">
+    <link rel="stylesheet" href="style.css" type="text/css">
     <title>Document</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
     <script defer>
         const urlParams = new URLSearchParams(window.location.search);
         const myParam = urlParams.get('err');
@@ -20,13 +18,13 @@
 
 </head>
 <body>
-<form action="/login" method="post">
+<form action="/api/login" method="post">
     Username: <input type="text" name="user">
     Password: <input name="pass" type="password">
     <input type="submit" value="Login">
 </form>
 <br>
-<form action="/register" method="post">
+<form action="/api/register" method="post">
     Username: <input type="text" name="user">
     Password: <input name="pass" type="password">
     <input type="submit" value="Register">
