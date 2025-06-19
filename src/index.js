@@ -147,7 +147,7 @@ app.get('/api/project', isAuthenticated, async function (req, res) {
     if (perms.permission !== 0) {
         let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
-        stmt = db.prepare('select products.id, products.name, products.mark, products.price, products.currency, project_products.number from `products` inner join project_products on project_products.product_name = products.name inner join `Project` on project_products.project_id = project.id where project.id = (?) and products.pricing_list_id = (?)');
+        stmt = db.prepare('select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_name = products.name inner join `Project` on project_products.project_id = project.id inner join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)');
         const items = stmt.all(req.query.id, project.shrack_pricing_list_id)
         stmt = db.prepare('SELECT * FROM `order` where project_id=(?)')
         const order = stmt.get(project.id);
