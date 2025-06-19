@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<span id="greeting"></span>
+<span id="greeting"></span> <a href="/api/logout">Logout</a>
 <div id="error" style="color: red"></div>
 <div id="projects"></div>
 <script>
@@ -36,6 +36,7 @@
 
             const json = await response.json();
             console.log(json);
+
             let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
             json.forEach(element => {
                 projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="/project.html?id='+ element.id + '">Otwórz</a></td></tr>'

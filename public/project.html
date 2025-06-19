@@ -5,36 +5,22 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="style.css" type="text/css">
+<!--    <link rel="stylesheet" href="style.css" type="text/css">-->
+    <link rel="stylesheet" href="project.css" type="text/css">
     <title>Projekt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="title"></div>
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const myParam = urlParams.get('id');
-    console.log(myParam)
-    async function getData() {
-        const url = "/api/project?id=" + myParam;
-        console.log(url);
-        try {
-            console.log('test')
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const json = await response.json();
-            console.log(json);
-            document.title = json.name;
-            document.getElementById("title").innerHTML ='<h1>' + json.name + '</h1>';
-
-        } catch (error) {
-            console.error(error.message);
-        }
-
-    }
-    getData();
-</script>
-</body>
+<div id="header">
+    <div id="name"></div><br>
+    <div id="numbers"></div>
+</div>
+<div id="pricingList">
+    <input type="button" onclick="pricingList()" value="Pricing List">
+    <div id="selection"></div>
+</div>
+<div id="table"></div>
+<script src="project.js"></script></body>
 </html>
