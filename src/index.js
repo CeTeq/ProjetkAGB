@@ -23,8 +23,11 @@ app.use(session({
 }));
 const allowedURLs = ['/login.html', '/login.css', '/style.css']
 app.use((req, res, next) => {
-    if ((allowedURLs.includes(req.path) || req.path.startsWith('/api') )|| (req.session.user && req.session.userID)) next();
-    else {
+    if ((allowedURLs.includes(req.path) || req.path.startsWith('/api') )|| (req.session.user && req.session.userID)) {
+        if (req.path === '/login.html' && (req.session.user && req.session.userID)) {
+            res.redirect('/user.html?username=' + req.session.user)
+        } else next();
+    } else {
         console.log('baseurl: ', req.path);
         res.redirect('/login.html')
     }
@@ -49,6 +52,7 @@ app.get('/', function (req, res) {
 });
 
 app.post('/api/login', async function (req, res) {
+    if(!req.body.user || !req.body.pass) return res.redirect('/login.html?err=wrongpassword');
     getUserData('users', req.body.user)
         .then(result => {
             const user = result;
@@ -80,23 +84,26 @@ app.post('/api/login', async function (req, res) {
 });
 
 app.post('/api/register', function (req, res) {
+    if(!req.body.user || !req.body.pass) return res.redirect('/login.html?err=wrongpassword');
     bcrypt.genSalt(10, async function (err, salt) {
         await bcrypt.hash(req.body.pass, salt, function (err, hash) {
             const dsa = db.prepare("select * from users where username = (?)");
             if (dsa.get(req.body.user) === undefined) {
-                let stmt = db.prepare('INSERT INTO users (username, password, salt) VALUES (?,?,?)');
+                let stmt = db.prepare('INSERT INTO users (username, password) VALUES (?,?)');
+                stmt.run(req.body.user, hash)
                 stmt = db.prepare("select MAX(id) as id from users")
+                const userID = stmt.get()
                 req.session.regenerate(function (err) {
                     if (err) next(err);
 
                     req.session.user = req.body.user;
-
+                    req.session.userID = userID;
                     req.session.save(function (err) {
                         if (err) return next(err);
-                        res.redirect('/');
+                        res.redirect('/user.html');
                     });
                 });
-            } else res.redirect('/');
+            } else res.redirect('/login.html');
         });
     });
 });
@@ -140,18 +147,31 @@ app.get('/api/project', isAuthenticated, async function (req, res) {
     if (perms.permission !== 0) {
         let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
-        stmt = db.prepare('select products.id, products.name, products.mark, products.price, products.currency from `products` inner join `projects_products` on projects_products.product_id = products.id inner join `Project` on projects_products.project_id = Project.id where project.id = (?)');
-        const items = stmt.get(req.query.id)
+        stmt = db.prepare('select products.id, products.name, products.mark, products.price, products.currency, project_products.number from `products` inner join project_products on project_products.product_name = products.name inner join `Project` on project_products.project_id = project.id where project.id = (?) and products.pricing_list_id = (?)');
+        const items = stmt.all(req.query.id, project.shrack_pricing_list_id)
+        stmt = db.prepare('SELECT * FROM `order` where project_id=(?)')
+        const order = stmt.get(project.id);
         console.log('items: ', items)
         if(perms.permission > 0){
             res.json({
                 id: project.id,
-                name: project.name
+                name: project.name,
+                client: order,
+                items: items
             })
-            console.log(res)
         }
     } else res.redirect('/?err=noPermissions');
 });
+app.get('/api/pricingList', isAuthenticated, async function (req, res) {
+    const stmt = db.prepare("SELECT *, (select Project.shrack_pricing_list_id from project where id = (?)) as inUse FROM shrack_cennik ;")
+    res.json(stmt.all(req.query.id));
+})
+app.post('/api/setPricingList', isAuthenticated, async function (req, res) {
+    let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
+    console.log(req.body)
+    stmt.run(req.body.pricingList, req.body.projectID)
+    res.sendStatus(200)
+})
 
 app.get('/api/magazyn', (req, res) => {
     let rows

@@ -1,0 +1,96 @@
+body{
+    font-family: "Roboto", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings:
+            "wdth" 100;
+}
+#zamowienie{
+    display: flex;
+    align-items: stretch;
+    justify-items: center;
+}
+@media print {
+    #print { display: none; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+}
+
+@page {
+    size: auto;
+    margin: 0.5rem 0;
+}
+#table {
+    position: absolute;
+    top: 400px;
+    left: 5%;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    width: 90%;
+}
+table, th, td {
+    border-top: 1px solid #F39F81;
+    border-bottom: 1px solid #F39F81;
+    border-collapse: collapse;
+    font-size: 20px;
+    width: 100%;
+    min-width: 80px;
+}
+
+th {
+    height: 20px;
+    padding-left: 2px;
+    padding-right: 2px;
+    background-color: #F39F81;
+    text-align: center;
+    font-weight: bold;
+    text-align: left;
+}
+
+td {
+    text-align: left;
+    min-width: 80px;
+
+}
+#header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+    position: absolute;
+    top: 4%;
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#name {
+    float: left;
+}
+#numbers {
+    float: left;
+}
+@media screen and (max-width: 600px) {
+    justify-content: center;
+}
+table {
+    border-collapse: collapse;
+}
+#client{
+    position: absolute;
+    left: 4%;
+    top: 16%;
+}
+#clientName{
+    font-weight: bold;
+}
+#pricingList {
+    position: absolute;
+    right: 4%;
+}
+@media print {
+    #pricingList{
+        display: none;
+    }
+}

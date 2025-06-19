@@ -1,16 +1,11 @@
-*{
-    color: #E0E0E0;
-    font-size: 20px;
-}
 body{
-    background-color: #121212;
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
 }
 input[type="password"], input[type="text"]{
-    background-color: #888888;
+    /*background-color: #888888;*/
     padding: 1px;
     margin: 3px;
     border: 1px solid #444444;
@@ -18,7 +13,7 @@ input[type="password"], input[type="text"]{
     display: flex;
 }
 input[type="submit"]{
-    background-color: #888888;
+    /*background-color: #888888;*/
     border: 1px solid #444444;
     margin: 2px;
     padding: 2px;
