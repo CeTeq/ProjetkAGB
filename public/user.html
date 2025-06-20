@@ -5,50 +5,17 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
     <title>Document</title>
     <link rel="stylesheet" href="./style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
 <span id="greeting"></span> <a href="/api/logout">Logout</a>
 <div id="error" style="color: red"></div>
 <div id="projects"></div>
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const myParam = urlParams.get('err');
-    const username = urlParams.get('username');
-    console.log(username);
-    console.log(myParam);
-    const error = document.getElementById('error');
-    if (myParam === "noPermissions") {error.innerHTML = "You do not have permission to access this page!";
-    }
-    if (username) document.getElementById('greeting').innerText = "Hello " + username + "!";
-
-    const table = document.getElementById('projects');
-
-    async function getData() {
-        const url = "/api/getProjects"
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const json = await response.json();
-            console.log(json);
-
-            let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
-            json.forEach(element => {
-                projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="/project.html?id='+ element.id + '">Otwórz</a></td></tr>'
-            })
-            table.innerHTML = projects + '</table>'
-
-        } catch (error) {
-            console.error(error.message);
-        }
-
-    }
-    getData();
-</script>
+<script src="user.js"></script>
 </body>
 </html>

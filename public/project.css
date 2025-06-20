@@ -50,8 +50,7 @@ th {
 
 td {
     text-align: left;
-    min-width: 80px;
-
+    min-width: 110px;
 }
 #header{
     display: flex;
@@ -89,8 +88,35 @@ table {
     position: absolute;
     right: 4%;
 }
+.product:hover {
+    background-color: gray;
+    cursor: pointer;
+}
+.product {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+#productsDisplay {
+    max-width: fit-content;
+    background-color: gainsboro;
+    margin: 1px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+.edit{
+    filter: invert(100%);
+}
+.edit:hover {
+    cursor: pointer;
+}
 @media print {
     #pricingList{
+        display: none;
+    }
+    td{
+        min-width: 80px;
+    }
+    .edit{
         display: none;
     }
 }

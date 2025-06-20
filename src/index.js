@@ -36,7 +36,18 @@ app.use(express.static('public'))
 
 function isAuthenticated(req, res, next) {
     if (req.session.user && req.session.userID) next();
-    else next('route');
+    else {
+        res.status(401).send('Unauthorized');
+        next('route');
+    }
+}
+function isAuthorized(req, requiredPermissions){
+    console.log(requiredPermissions);
+    const stmt = db.prepare('SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);')
+    const perm = stmt.get(req.session.userID, req.body.projectID).permission
+    if(!perm || perm === 0) return false
+    else if (perm < requiredPermissions) return false
+    else return true
 }
 
 app.get('/', isAuthenticated, function (req, res) {
@@ -142,13 +153,15 @@ function isPasswordCorrect(password, hash) {
 
 app.get('/api/project', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = ? AND project_id = ?");
+    if(!req.query.id) return res.json('Bad request');
     const perms = stmt.get(1, req.query.id);
 
     if (perms.permission !== 0) {
         let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
-        stmt = db.prepare('select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_name = products.name inner join `Project` on project_products.project_id = project.id inner join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)');
+        stmt = db.prepare('select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_id = products.id inner join `Project` on project_products.project_id = project.id inner join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)');
         const items = stmt.all(req.query.id, project.shrack_pricing_list_id)
+        console.log(items)
         stmt = db.prepare('SELECT * FROM `order` where project_id=(?)')
         const order = stmt.get(project.id);
         console.log('items: ', items)
@@ -162,11 +175,11 @@ app.get('/api/project', isAuthenticated, async function (req, res) {
         }
     } else res.redirect('/?err=noPermissions');
 });
-app.get('/api/pricingList', isAuthenticated, async function (req, res) {
+app.get('/api/project/pricingList', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT *, (select Project.shrack_pricing_list_id from project where id = (?)) as inUse FROM shrack_cennik ;")
     res.json(stmt.all(req.query.id));
 })
-app.post('/api/setPricingList', isAuthenticated, async function (req, res) {
+app.post('/api/project/setPricingList', isAuthenticated, async function (req, res) {
     let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
     console.log(req.body)
     stmt.run(req.body.pricingList, req.body.projectID)
@@ -189,7 +202,25 @@ app.get('/api/magazyn', (req, res) => {
         res.send(table)
     });
 })
+app.get('/api/products', isAuthenticated, async function (req, res) {
+    let stmt = db.prepare('SELECT * FROM `products`')
+    const products = stmt.all()
+    stmt = db.prepare('SELECT * FROM `project_products`')
+    const usedProducts = stmt.all()
+    products.forEach((element)=>{
+        if(usedProducts.find(o => o.product_id === element.id)){
+            element.inUse = true;
+        }
+    })
+    res.send(products)
+})
 app.get('/api/getProjects', isAuthenticated, (req, res) => {
     let stmt = db.prepare("select project.id, project.name, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0");
     res.send(stmt.all(JSON.stringify(req.session.userID)))
+})
+app.post('/api/project/addNewelement', isAuthenticated, async function (req, res) {
+    if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    const stmt = db.prepare('INSERT INTO `project_products` (project_id, product_id, number) VALUES (?, ?, ?)')
+    console.log(stmt.run(req.body.projectID, req.body.productID, req.body.amount))
+    res.status(200).send('ok')
 })
