@@ -21,7 +21,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
-const allowedURLs = ['/login.html', '/login.css', '/style.css']
+const allowedURLs = ['/login.html', '/login.css', '/styles.css']
 app.use((req, res, next) => {
     if ((allowedURLs.includes(req.path) || req.path.startsWith('/api') )|| (req.session.user && req.session.userID)) {
         if (req.path === '/login.html' && (req.session.user && req.session.userID)) {
