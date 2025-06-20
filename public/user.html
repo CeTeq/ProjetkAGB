@@ -7,12 +7,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>Document</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./user.css">
 </head>
 <body>
 <span id="greeting"></span> <a href="/api/logout">Logout</a>
 <div id="error" style="color: red"></div>
-<div id="projects"></div>
+<h1>Projekty</h1>
+<div class="projects"></div>
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const myParam = urlParams.get('err');
@@ -24,7 +26,7 @@
     }
     if (username) document.getElementById('greeting').innerText = "Hello " + username + "!";
 
-    const table = document.getElementById('projects');
+    const table = document.querySelector('.projects');
 
     async function getData() {
         const url = "/api/getProjects"
@@ -37,12 +39,25 @@
             const json = await response.json();
             console.log(json);
 
-            let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
             json.forEach(element => {
-                projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="/project.html?id='+ element.id + '">Otwórz</a></td></tr>'
-            })
-            table.innerHTML = projects + '</table>'
+                const project = document.createElement("a")
+                project.innerHTML = `
+                    <h3></h3>
+                    <div class="company">
+                        <img src="/icons/company.svg">
+                        <span class="company-name"></span>
+                    </div>
+                    <div class="description"></div>
+                `
 
+                project.href = `/project.html?id=${element.id}`;
+
+                project.querySelector("h3").innerText = element.name;
+                project.querySelector(".description").innerText = element.description || "Brak opisu";
+                project.querySelector(".company-name").innerText = element.company ? `${element.company.name}; ${element.company.street}` : "N/A";
+
+                document.querySelector('.projects').appendChild(project)
+            })
         } catch (error) {
             console.error(error.message);
         }
