@@ -159,7 +159,7 @@ app.get('/api/project', isAuthenticated, async function (req, res) {
     if (perms.permission !== 0) {
         let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
-        stmt = db.prepare('select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_id = products.id inner join `Project` on project_products.project_id = project.id inner join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)');
+        stmt = db.prepare('select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_id = products.id join `Project` on project_products.project_id = project.id join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)');
         const items = stmt.all(req.query.id, project.shrack_pricing_list_id)
         console.log(items)
         stmt = db.prepare('SELECT * FROM `order` where project_id=(?)')
@@ -179,29 +179,6 @@ app.get('/api/project/pricingList', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT *, (select Project.shrack_pricing_list_id from project where id = (?)) as inUse FROM shrack_cennik ;")
     res.json(stmt.all(req.query.id));
 })
-app.post('/api/project/setPricingList', isAuthenticated, async function (req, res) {
-    let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
-    console.log(req.body)
-    stmt.run(req.body.pricingList, req.body.projectID)
-    res.sendStatus(200)
-})
-
-app.get('/api/magazyn', (req, res) => {
-    let rows
-    let table
-    db.all("SELECT nazwa, cena, znacznik FROM produkty", function(err, allRows) {
-        if(err != null){
-            console.log(err);
-        }
-        rows = allRows
-        table = "<table><tr><th>Nazwa produktu</th><th>Ilość</th><th>Cena</th></tr>"
-        rows.forEach((element)=>{
-            table+= '<tr><td>' + element.Nazwa_produktu + '</td><td class="cent">' + element.Znacznik_produktu + '</td><td class="cent">' + element.Cena_produktu * element.Ilość_produktu + 'zł' + '</td></tr>'
-        })
-        table += '</table>'
-        res.send(table)
-    });
-})
 app.get('/api/products', isAuthenticated, async function (req, res) {
     let stmt = db.prepare('SELECT * FROM `products`')
     const products = stmt.all()
@@ -218,9 +195,46 @@ app.get('/api/getProjects', isAuthenticated, (req, res) => {
     let stmt = db.prepare("select project.id, project.name, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0");
     res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
+
+app.post('/api/project/setPricingList', isAuthenticated, async function (req, res) {
+    let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
+    console.log(req.body)
+    stmt.run(req.body.pricingList, req.body.projectID)
+    res.sendStatus(200)
+})
+app.post('/api/project/deleteItem', isAuthenticated, async function (req, res) {
+    if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    const stmt = db.prepare('DELETE from `project_products` WHERE project_id = (?) AND product_id = (?)');
+    stmt.run(req.body.projectID, req.body.productID)
+    res.sendStatus(200)
+})
 app.post('/api/project/addNewelement', isAuthenticated, async function (req, res) {
     if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
     const stmt = db.prepare('INSERT INTO `project_products` (project_id, product_id, number) VALUES (?, ?, ?)')
     console.log(stmt.run(req.body.projectID, req.body.productID, req.body.amount))
     res.status(200).send('ok')
+})
+app.post('/api/project/updateItem', isAuthenticated, async function (req, res) {
+    if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    const stmt = db.prepare('UPDATE `project_products` SET number = (?) where product_id = (?) and project_id = (?)')
+    stmt.run(req.body.amount, req.body.productID, req.body.projectID)
+    res.status(200).send('ok')
+})
+
+
+app.get('/api/magazyn', (req, res) => {
+    let rows
+    let table
+    db.all("SELECT nazwa, cena, znacznik FROM produkty", function(err, allRows) {
+        if(err != null){
+            console.log(err);
+        }
+        rows = allRows
+        table = "<table><tr><th>Nazwa produktu</th><th>Ilość</th><th>Cena</th></tr>"
+        rows.forEach((element)=>{
+            table+= '<tr><td>' + element.Nazwa_produktu + '</td><td class="cent">' + element.Znacznik_produktu + '</td><td class="cent">' + element.Cena_produktu * element.Ilość_produktu + 'zł' + '</td></tr>'
+        })
+        table += '</table>'
+        res.send(table)
+    });
 })
