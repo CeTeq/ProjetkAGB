@@ -29,15 +29,17 @@ body{
     justify-items: center;
     width: 90%;
 }
+
 table, th, td {
     border-top: 1px solid #F39F81;
     border-bottom: 1px solid #F39F81;
     border-collapse: collapse;
     font-size: 20px;
     width: 100%;
-    min-width: 80px;
 }
-
+.editTD {
+    min-width: 30px;
+}
 th {
     height: 20px;
     padding-left: 2px;
@@ -50,7 +52,17 @@ th {
 
 td {
     text-align: left;
-    min-width: 110px;
+    min-width: 80px;
+}
+td:nth-child(2) {
+    padding-right: 7px;
+}
+td:nth-child(3) {
+    padding-left: 7px;
+    border-left: #F39F81 solid 1px;
+}
+.price{
+    border-left: 1px solid #F39F81;
 }
 #header{
     display: flex;
@@ -70,9 +82,6 @@ td {
 #numbers {
     float: left;
 }
-@media screen and (max-width: 600px) {
-    justify-content: center;
-}
 table {
     border-collapse: collapse;
 }
@@ -88,13 +97,17 @@ table {
     position: absolute;
     right: 4%;
 }
-.product:hover {
+.productEnabled:hover {
     background-color: gray;
     cursor: pointer;
 }
 .product {
     padding-left: 10px;
     padding-right: 10px;
+}
+#addNewProduct {
+    display: flex;
+    flex-direction: row;
 }
 #productsDisplay {
     max-width: fit-content;
@@ -103,10 +116,19 @@ table {
     border: 1px solid black;
     border-radius: 10px;
 }
+#searchBarDiv{
+    float: left;
+}
+#searchBarNumberDiv{
+    float: left;
+}
 .edit{
     filter: invert(100%);
 }
 .edit:hover {
+    cursor: pointer;
+}
+.hoverPointer:hover{
     cursor: pointer;
 }
 @media print {
@@ -118,5 +140,17 @@ table {
     }
     .edit{
         display: none;
+    }
+}
+@media screen and (max-width: 600px) {
+    justify-content: center;
+    #searchBarDiv{
+        float: none;
+    }
+    #searchBarNumberDiv{
+        float: none
+    }
+    #addNewProduct {
+        display: block;
     }
 }
