@@ -81,6 +81,7 @@ td:nth-child(3) {
 }
 #numbers {
     float: left;
+    padding-top: 105px;
 }
 table {
     border-collapse: collapse;
@@ -125,6 +126,10 @@ table {
 .edit{
     filter: invert(100%);
 }
+.editTD>img{
+    width: 30px;
+    height: 30px;
+}
 .edit:hover {
     cursor: pointer;
 }
@@ -141,8 +146,14 @@ table {
     .edit{
         display: none;
     }
+    #adderTD {
+        display: none;
+    }
 }
 @media screen and (max-width: 600px) {
+    body {
+        zoom: 100%;
+    }
     justify-content: center;
     #searchBarDiv{
         float: none;
@@ -153,4 +164,8 @@ table {
     #addNewProduct {
         display: block;
     }
+    input[type='number'] {
+        width: 90%;
+    }
+
 }

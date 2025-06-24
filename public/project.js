@@ -119,6 +119,7 @@ async function displayProducts(products) {
     }))
     const add = document.createElement('tr');
     const td = document.createElement('td');
+    add.id = 'adderTD'
     const button = document.createElement('button');
     const adder = document.createElement('div')
     adder.id = 'adder';
