@@ -1,3 +1,6 @@
+html{
+    scroll-behavior: smooth;
+}
 body{
     font-family: "Roboto", serif;
     font-optical-sizing: auto;
@@ -10,6 +13,9 @@ body{
     display: flex;
     align-items: stretch;
     justify-items: center;
+}
+#adder {
+    align-self: flex-start;
 }
 @media print {
     #print { display: none; }
@@ -25,9 +31,10 @@ body{
     top: 400px;
     left: 5%;
     display: flex;
-    align-items: center;
+    align-items: f;
     justify-items: center;
     width: 90%;
+    flex-direction: column;
 }
 
 table, th, td {
@@ -107,21 +114,33 @@ table {
     padding-right: 10px;
 }
 #addNewProduct {
-    display: flex;
-    flex-direction: row;
+    /*display: flex;*/
+    /*flex-direction: row;*/
 }
 #productsDisplay {
-    max-width: fit-content;
-    background-color: gainsboro;
+    width: 100%;
+    background-color: white;
     margin: 1px;
     border: 1px solid black;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 #searchBarDiv{
     float: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 #searchBarNumberDiv{
     float: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+#abortADD{
+    height: 30px;
+    width: 30px;
 }
 .edit{
     filter: invert(100%);
@@ -151,15 +170,12 @@ table {
     }
 }
 @media screen and (max-width: 600px) {
-    body {
-        zoom: 100%;
-    }
     justify-content: center;
     #searchBarDiv{
-        float: none;
+        clear: both;
     }
     #searchBarNumberDiv{
-        float: none
+        clear: both;
     }
     #addNewProduct {
         display: block;
