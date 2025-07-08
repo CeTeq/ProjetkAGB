@@ -82,6 +82,7 @@ async function displayProducts(products) {
     productslist.forEach((item => {
         item.edit.addEventListener('click', (e) => {
             if(!editting) {
+                item.edit.scrollIntoView()
                 editting = true;
                 console.log('delete: ', item.id)
                 const remove = document.createElement('img')
@@ -126,10 +127,10 @@ async function displayProducts(products) {
     button.textContent = 'Add Element';
     button.onclick = addElement;
     td.appendChild(button);
-    td.appendChild(adder);
     add.appendChild(td);
     table.appendChild(add);
     document.getElementById("table").appendChild(table)
+    document.getElementById('table').appendChild(adder);
 }
 
 
@@ -165,15 +166,18 @@ async function pricingList() {
 }
 function addElement() {
     const adder = document.getElementById('adder');
-    adder.innerHTML = '<fomr id="addNewProduct"><div id="searchBarDiv"><label for="searchBar">Wybierz produkt</label><br>\n' +
+    document.querySelector('#adder').style.display = 'block';
+    adder.innerHTML = '<fomr id="addNewProduct"><div id="searchBarDiv"><label for="searchBar">Wybierz produkt</label>\n' +
         '    <input type="text" id="searchBar" required><div id="productsDisplay"></div></div>\n' +
-        '    <div id="searchBarNumberDiv"><label for="searchBarNumber">Iość</label><br><input type="number" id="searchBarNumber"> ' +
-        '    <button onclick="submitNewelement()">Dodaj</button></div>' +
-        ' </fomr>\n' +
-        '<div id="productsDisplay">';
+        '    <div id="searchBarNumberDiv"><label for="searchBarNumber">Iość</label><div style="display: flex; align-items: flex-start"><input type="number" id="searchBarNumber">' +
+        '    <button onclick="submitNewelement()">Dodaj</button><img id="abortADD" class="hoverPointer" src="close.svg" alt="abort"></div></div>' +
+        ' </fomr>\n'
     searchBar = document.getElementById('searchBar');
     productsDisplay = document.getElementById('productsDisplay');
     showProducts();
+    document.querySelector('#abortADD').addEventListener('click', (event) => {
+        document.querySelector('#adder').style.display = 'none';
+    })
     searchBar.addEventListener('click', (event) => {
         showProducts(true);
         console.log('clicked');
@@ -191,6 +195,7 @@ function addElement() {
         }
         product.element.style.display = 'block'
     })
+    document.querySelector('#adder').scrollIntoView()
 }
 let selectedProduct
 

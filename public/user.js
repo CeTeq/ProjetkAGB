@@ -8,7 +8,7 @@ if (myParam === "noPermissions") {error.innerHTML = "You do not have permission 
 }
 if (username) document.getElementById('greeting').innerText = "Hello " + username + "!";
 
-const table = document.getElementById('projects');
+const table = document.querySelector('.projects');
 
 async function getData() {
     const url = "/api/getProjects"
@@ -21,18 +21,25 @@ async function getData() {
         const json = await response.json();
         console.log(json);
 
-        // let projects = `<table><tr><th>ID</th><th>Nazwa</th><th>Uprawnienia</th><th></th></tr>`
-        // json.forEach(element => {
-        //     projects += '<tr><td>' + element.id + '</td>' + '<td>' + element.name + '</td>' + '<td>' + element.permission + '</td><td><a href="/project.html?id='+ element.id + '">Otwórz</a></td></tr>'
-        // })
-        // table.innerHTML = projects + '</table>'
-        let projects = '<ul>'
-        json.forEach((element) => {
-            projects += '<li>' + element.name + ' <a href="/project.html?id=' + element.id + '">Otwórz</a></li>'
-            console.log(element)
-        })
-        table.innerHTML += projects + '</ul>'
+        json.forEach(element => {
+            const project = document.createElement("a")
+            project.innerHTML = `
+                    <h3></h3>
+                    <div class="company">
+                        <img src="./company.svg">
+                        <span class="company-name"></span>
+                    </div>
+                    <div class="description"></div>
+                `
 
+            project.href = `/project.html?id=${element.id}`;
+
+            project.querySelector("h3").innerText = element.name;
+            project.querySelector(".description").innerText = element.description || "Brak opisu";
+            project.querySelector(".company-name").innerText = element.company ? `${element.company.name}; ${element.company.street}` : "N/A";
+
+            document.querySelector('.projects').appendChild(project)
+        })
     } catch (error) {
         console.error(error.message);
     }
