@@ -234,7 +234,7 @@ function showProducts(again) {
             li.classList.add('product')
             li.classList.add('productEnabled');
             ul.appendChild(li);
-            return {name: item.name, element: li id: item.id};
+            return {name: item.name, element: li, id: item.id};
         })
         console.log(newProducts);
         productsDisplay.appendChild(ul)
