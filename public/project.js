@@ -183,7 +183,7 @@ function addElement() {
         console.log('clicked');
     })
     newProducts.forEach(product => {
-        if (product.inUse) {
+        if (productslist.some(el => el.id === product.id)) {
             product.element.style.color = 'gray'
         } else {
             product.element.addEventListener('click', (event) => {
@@ -234,8 +234,9 @@ function showProducts(again) {
             li.classList.add('product')
             li.classList.add('productEnabled');
             ul.appendChild(li);
-            return {name: item.name, element: li, inUse: item.inUse};
+            return {name: item.name, element: li id: item.id};
         })
+        console.log(newProducts);
         productsDisplay.appendChild(ul)
     }
 
@@ -245,7 +246,7 @@ function showProducts(again) {
         const value = event.target.value.toLowerCase();
         newProducts.forEach(product => {
             if (product.name.toLowerCase().includes(value)) {
-                if (product.inUse) product.element.style.color = 'gray'
+                if (productslist.some(el => el.id === product.id)) product.element.style.color = 'gray'
                 product.element.style.display = 'block'
             } else product.element.style.display = 'none';
         });
