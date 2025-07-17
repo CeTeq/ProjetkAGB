@@ -184,11 +184,11 @@ app.get('/api/products', isAuthenticated, async function (req, res) {
     const products = stmt.all()
     stmt = db.prepare('SELECT * FROM `project_products`')
     const usedProducts = stmt.all()
-    products.forEach((element)=>{
-        if(usedProducts.find(o => o.product_id === element.id)){
-            element.inUse = true;
-        }
-    })
+    // products.forEach((element)=>{
+    //     if(usedProducts.find(o => o.product_id === element.id)){
+    //         element.inUse = true;
+    //     }
+    // })
     res.send(products)
 })
 app.get('/api/getProjects', isAuthenticated, (req, res) => {
@@ -204,12 +204,16 @@ app.post('/api/project/setPricingList', isAuthenticated, async function (req, re
 })
 app.post('/api/project/deleteItem', isAuthenticated, async function (req, res) {
     if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    if(!req.body.projectID || !req.body.productID) return
     const stmt = db.prepare('DELETE from `project_products` WHERE project_id = (?) AND product_id = (?)');
     stmt.run(req.body.projectID, req.body.productID)
     res.sendStatus(200)
 })
 app.post('/api/project/addNewelement', isAuthenticated, async function (req, res) {
     if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    if(!req.body.number || !req.body.productID) return res.status(400).send('Bad request.')
+    if(!req.body.projectID || !req.body.productID) return
+    if(req.body.number <= 0 || !req.body.number.isInteger()) return res.status(400).send('Invalid amount.')
     const stmt = db.prepare('INSERT INTO `project_products` (project_id, product_id, number) VALUES (?, ?, ?)')
     console.log(stmt.run(req.body.projectID, req.body.productID, req.body.amount))
     res.status(200).send('ok')
@@ -220,7 +224,17 @@ app.post('/api/project/updateItem', isAuthenticated, async function (req, res) {
     stmt.run(req.body.amount, req.body.productID, req.body.projectID)
     res.status(200).send('ok')
 })
-
+app.post('/api/project/newProject', isAuthenticated, async function (req, res) {
+    if(!req.body || !req.body.name || !req.body.street || !req.body.street_number || !req.body.post_code || !req.body.city) return res.status(400).send('Bad request')
+    if(!req.body.description) req.body.description = 'Brak opisu'
+    let stmt = db.prepare('INSERT INTO Project (name, shrack_pricing_list_id) VALUES ((?), (SELECT id from shrack_cennik ORDER BY id DESC LIMIT 1));')
+    stmt.run(req.body.name)
+    stmt = db.prepare('INSERT INTO "order" (name, street, street_number, post_code, city, project_id, date, description) VALUES ((?), (?), (?), (?), (?), (SELECT id from Project ORDER BY id DESC LIMIT 1), (?), (?))')
+    stmt.run(req.body.name, req.body.street, req.body.street_number, req.body.post_code, req.body.city, req.body.date, req.body.description)
+    stmt = db.prepare('INSERT INTO permissions (user_id, permission, project_id) VALUES ((?), 2, (SELECT id from Project ORDER BY id DESC LIMIT 1))')
+    stmt.run(req.session.userID)
+    res.redirect('/')
+})
 
 app.get('/api/magazyn', (req, res) => {
     let rows
