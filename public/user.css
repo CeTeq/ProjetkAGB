@@ -1,86 +1,112 @@
-body:has(#dim:not(.hidden)) {
-    overflow: hidden;
+body{
+    margin: 0;
 }
-.projects > a {
-    text-decoration: none;
-    color: black;
-    border: 1px solid black;
-    margin: 5px;
-    padding: 10px;
-    border-radius: 5px;
-    width: calc(100svw - 10px);
+.mdui-top-app-bar {
+    /*border-bottom: solid 1px lightgray;*/
+    /*box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.01);*/
+    text-align: center;
+}
+.mobile-nav-bar {
+    display: none;
+}
+.desktop-nav-rail {
+    text-align: center;
+    margin-top: 64px;
+}
+body {
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    /*font-weight: <weight>;*/
+    font-style: normal;
+    font-variation-settings:
+            "wdth" 100;
 }
 
-@media (min-width: 600px) {
-    .projects > a {
-        max-width: 250px;
-    }
-}
 
-.projects > a h3 {
-    margin: 0 0 5px;
+.user-nav {
+    display: block;
 }
-
-.projects > a  > .company {
+#phoneADD{
+    display: none;
+    z-index: 10;
+}
+.project-card {
     display: flex;
-    align-items: center;
 }
-
 .projects {
     display: flex;
     flex-wrap: wrap;
 }
-#newProject {
-    clear: both;
-    width: 30%;
-    position: absolute;
-    left: 35%;
-    top: 20%;
-    background-color: white;
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid black;
-    /*box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .3);*/
+.projects > mdui-card {
+    text-decoration: none;
+    color: black;
+    /*border: 1px solid black;*/
+    /*margin: 5px;*/
+    padding: 10px;
+    border-radius: 5px;
+    /*width: calc(100svw - 10px);*/
+    user-select: none;
+}
+.top-bar {
+    height: 10px;
+}
+.project-container {
+    position: relative;
+    cursor: pointer;
     display: flex;
-    text-align: center;
 }
-#newProject > img {
-    margin-left: auto;
-}
-#newProjectForm > input {
-    width: 80% !important;
-}
-#newProject{
-    display: flex;
-    flex-direction: column;
-    /*align-items: center;*/
-    justify-content: center;
+.more-project {
+    display: none;
 }
 
-#plus {
-    margin-left: 10px;
-    color: black;
-    user-select: none;
-    cursor: pointer;
-}
-#dim {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, .5);
-}
-.hidden {
-    display: none;
-}
-.cursorPointer{
-    cursor: pointer;
-}
-#phoneADD{
-    display: none;
+@media screen and (min-width: 600px) {
+    .project-card {
+        min-width: 150px;
+        max-width: 250px;
+        margin-left: 10px;
+        padding: 10px;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .projects > mdui-card {
+        max-width: 250px;
+
+    }
+    .projects > mdui-card h3 {
+        margin: 0 0 5px;
+    }
+
+    .projects > mdui-card  > .company {
+        display: flex;
+        align-items: center;
+    }
+
+    .projects {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
 }
 @media screen and (max-width: 600px) {
+    .project-container {
+        display: flex;
+        width: 90%;
+        margin-left: 5%;
+    }
+    .project-card {
+        width: 100%;
+        padding: 10px;
+        min-height: 120px;
+    }
+    .top-bar {
+        display: block;
+    }
+    .project-container {
+        margin-top: 10px;
+    }
+    .project-container:last-of-type {
+        margin-bottom: 10px;
+    }
     #newProject {
         width: 80%;
         left: 5%;
@@ -88,22 +114,47 @@ body:has(#dim:not(.hidden)) {
     }
     #phoneADD {
         position: fixed;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: #F39F81;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        text-align: center;
-        bottom: 15px;
+        display: block;
+        bottom: 95px;
         right: 15px;
-        font-size: 50px;
-        font-weight: 300;
     }
     #plus {
         display: none;
         scroll-behavior: smooth;
     }
+    .project-nav {
+        display: none;
+    }
+    .mobile-nav-bar {
+        display: block;
+    }
+    .desktop-nav-rail {
+        display: none;
+    }
+    .more-project {
+        display: block;
+        position: absolute;
+        align-self: flex-start;
+        margin-top: 0px;
+        left: 90%;
+        z-index: 1;
+    }
+    mdui-menu > mdui-menu-item {
+        z-index: 9999;
+    }
+    .delete-project-dialog > div:last-child {
+        display: flex;
+        justify-content: center;
+        /*padding-right: 10px;*/
+    }
+    .delete-project-dialog > div:last-child > mdui-button {
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-top: 20px;
+    }
+    .snack-bar-delete-project {
+        display: flex;
+        margin-bottom: 20%;
+    }
+
 }

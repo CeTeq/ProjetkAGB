@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Document</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./user.css">
+    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+
+<span id="greeting"></span> <a href="/api/logout">Logout</a>
+<div id="error" style="color: red"></div>
+<h1 style="float: left">Projekty</h1><h1 style="float: left" id="plus" onclick="showNewProjectForm()"> +</h1>
+<div style="clear: both" class="projects"></div>
+<!--<div id="phoneADD" onclick="showNewProjectForm()">+</div>-->
+<mdui-fab id="phoneADD" onclick="showNewProjectForm()" icon="add"></mdui-fab><mdui-icon name='add'></mdui-icon>
+<script src="./user.js"></script>
+<script type="module">
+    import { setColorScheme } from 'https://unpkg.com/mdui@2/mdui.esm.js'
+    console.log(setColorScheme('#314578'));
+</script>
+</body>
+</html>
