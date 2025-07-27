@@ -23,8 +23,8 @@
 </head>
 <body>
 <form action="/api/login" method="post">
-    Username: <input type="text" name="user">
-    Password: <input name="pass" type="password">
+    Username: <input type="text" name="user" id="login"><br>
+    Password: <input name="pass" type="password" id="password">
     <input type="submit" value="Login">
 </form>
 <br>
@@ -35,6 +35,13 @@
 </form>
 <div id="error"></div>
 <br>
+<script>
+    const login = document.getElementById('login');
+    const password = document.getElementById('password');
+
+    login.value = 'admin'
+    password.value = 'admin'
+</script>
 </body>
 </html>
 

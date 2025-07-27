@@ -175,6 +175,13 @@ app.get('/api/project', isAuthenticated, async function (req, res) {
         }
     } else res.redirect('/?err=noPermissions');
 });
+app.post('/api/project/archive', isAuthenticated, async function (req, res) {
+    if(!req.body || !req.body.projectID || !req.body.archived) return res.status(400).send('Bad request');
+    isAuthorized(req, 7)
+    const stmt = db.prepare('UPDATE Project SET archived = (?) WHERE id = (?)')
+    if(stmt.run(req.body.archived, req.body.projectID)) res.status(200).send('ok')
+    else res.status(500).send('Internal server error!')
+})
 app.get('/api/project/pricingList', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT *, (select Project.shrack_pricing_list_id from project where id = (?)) as inUse FROM shrack_cennik ;")
     res.json(stmt.all(req.query.id));
@@ -192,7 +199,7 @@ app.get('/api/products', isAuthenticated, async function (req, res) {
     res.send(products)
 })
 app.get('/api/getProjects', isAuthenticated, (req, res) => {
-    let stmt = db.prepare("select project.id, project.name, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0");
+    let stmt = db.prepare("select project.id, project.name, project.archived, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0;");
     res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
 
