@@ -36,13 +36,23 @@
         <mdui-navigation-rail-item icon="account_box" value="account">Konto</mdui-navigation-rail-item>
     </mdui-navigation-rail>
     <mdui-layout-main>
-        <mdui-tabs class="project-nav" value="item-1" full-width>
-            <mdui-tab value="item-1">Informacje</mdui-tab>
-            <mdui-tab value="item-2">Projekt</mdui-tab>
-            <mdui-tab value="item-3">Kosztorys</mdui-tab>
+        <mdui-tabs class="project-nav" value="active" full-width>
+            <mdui-tab value="active">Projekty</mdui-tab>
+            <mdui-tab value="archived">Zarchiwizowane</mdui-tab>
+
+            <mdui-tab-panel value="active" slot="panel">
+                <mdui-layout-item class="projects projects-active">
+
+                </mdui-layout-item>
+            </mdui-tab-panel>
+            <mdui-tab-panel value="archived" slot="panel">
+                <mdui-layout-item class="projects projects-archived">
+
+                </mdui-layout-item>
+            </mdui-tab-panel>
         </mdui-tabs>
-        <mdui-layout-item class="projects">
-        </mdui-layout-item>
+
+
         <mdui-fab id="phoneADD" onclick="showNewProjectForm()" icon="add"></mdui-fab>
     </mdui-layout-main>
     <mdui-layout-item placement="bottom" class="mobile-nav-bar">
@@ -51,12 +61,12 @@
             <mdui-navigation-bar-item href="/user.html" icon="list" value="item-1">Lista Projektów</mdui-navigation-bar-item>
             <mdui-navigation-bar-item icon="account_box" value="item-3">Konto</mdui-navigation-bar-item>
 <!--            <mdui-navigation-bar-item icon="more_vert"></mdui-navigation-bar-item>-->
-            <mdui-dropdown>
-                <mdui-button-icon style="align-self: center;" icon="more_vert" slot="trigger"></mdui-button-icon>
-                <mdui-menu>
-                    <mdui-menu-item onclick="editMode()">Edytuj</mdui-menu-item>
-                </mdui-menu>
-            </mdui-dropdown>
+<!--            <mdui-dropdown>-->
+<!--                <mdui-button-icon style="align-self: center;" icon="more_vert" slot="trigger"></mdui-button-icon>-->
+<!--                <mdui-menu>-->
+<!--                    <mdui-menu-item onclick="editMode()">Edytuj</mdui-menu-item>-->
+<!--                </mdui-menu>-->
+<!--            </mdui-dropdown>-->
         </mdui-navigation-bar>
     </mdui-layout-item>
 </mdui-layout>
