@@ -27,30 +27,55 @@ async function getData() {
         json.forEach(element => {
             const projectContainer = document.createElement('div')
             projectContainer.classList.add('project-container');
-            const more = document.createElement('mdui-dropdown');
-            const dropdownTrigger = document.createElement('mdui-button-icon')
-            const dropdownMenu = document.createElement('mdui-menu')
-            const menuItem1 = document.createElement('mdui-menu-item');
-            const menuItem2 = document.createElement('mdui-menu-item');
 
-            menuItem1.innerText = 'Edytuj'
-            menuItem2.innerText = 'Zarchiwizuj'
-            menuItem2.addEventListener('click', (e) => {
-                archiveProject(e.target.closest('.project-container'));
-            })
-            dropdownMenu.appendChild(menuItem1);
-            dropdownMenu.appendChild(menuItem2);
 
-            dropdownTrigger.setAttribute('icon', 'more_vert')
-            dropdownTrigger.setAttribute('slot', 'trigger')
 
-            more.appendChild(dropdownTrigger);
-            more.appendChild(dropdownMenu);
+            if(element.archived !== 2) {
+                const more = document.createElement('mdui-dropdown');
+                const dropdownTrigger = document.createElement('mdui-button-icon')
+                const dropdownMenu = document.createElement('mdui-menu')
+                const menuItem1 = document.createElement('mdui-menu-item');
+                const menuItem2 = document.createElement('mdui-menu-item');
+
+                menuItem1.innerText = 'Edytuj'
+                menuItem2.innerText = 'Zarchiwizuj'
+                menuItem2.addEventListener('click', (e) => {
+                    archiveProject(e.target.closest('.project-container'));
+                })
+                dropdownMenu.appendChild(menuItem1);
+                dropdownMenu.appendChild(menuItem2);
+
+                dropdownTrigger.setAttribute('icon', 'more_vert')
+                dropdownTrigger.setAttribute('slot', 'trigger')
+
+                more.appendChild(dropdownTrigger);
+                more.appendChild(dropdownMenu);
+                more.classList.add('more-project')
+                projectContainer.appendChild(more)
+            } else {
+                const more = document.createElement('mdui-dropdown');
+                const dropdownTrigger = document.createElement('mdui-button-icon')
+                const dropdownMenu = document.createElement('mdui-menu')
+                const menuItem1 = document.createElement('mdui-menu-item');
+
+                menuItem1.innerText = 'Przywróć';
+                menuItem1.addEventListener('click', (e) => {
+                    unarchiveProject(e.target.closest('.project-container'));
+                })
+
+                dropdownMenu.appendChild(menuItem1);
+
+                dropdownTrigger.setAttribute('icon', 'more_vert')
+                dropdownTrigger.setAttribute('slot', 'trigger')
+
+                more.appendChild(dropdownTrigger);
+                more.appendChild(dropdownMenu);
+                more.classList.add('more-project')
+                projectContainer.appendChild(more)
+            }
             // projectContainer.appendChild('<mdui-button-icon icon="more_vert" class="more-project"></mdui-button-icon>');
             // more.setAttribute('icon', 'more_vert')
             // more.setAttribute('slot', 'trigger')
-            more.classList.add('more-project')
-            projectContainer.appendChild(more)
             const project = document.createElement("mdui-card")
             project.classList.add("project-card")
             project.innerHTML = `
@@ -69,10 +94,15 @@ async function getData() {
             project.querySelector("h3").innerText = element.name;
             project.querySelector(".description").innerText = element.description || "Brak opisu";
             project.querySelector(".company-name").innerText = element.company ? `${element.company.name}; ${element.company.street}` : "N/A";
-
+            document.body.querySelectorAll('.project').forEach((e)=>{
+                e.innerHTML = ''
+            })
             projectContainer.appendChild(project)
-            if(json.archived === 2) projectContainer.classList.add('archived')
-            document.querySelector('.projects').appendChild(projectContainer);
+            if(element.archived === 2) {
+                // projectContainer.classList.add('archived')
+                document.querySelector('.projects-archived').appendChild(projectContainer);
+            } else document.querySelector('.projects-active').appendChild(projectContainer);
+
             projectCards.push({
                 container: projectContainer,
                 href: project.href,
@@ -165,6 +195,7 @@ function archiveProject(card) {
                 archived: 1
             })
         })
+        location.reload()
     })
 
     document.body.appendChild(snackBar)
@@ -186,6 +217,11 @@ function archiveProject(card) {
                 archived: 2
             })
         })
+        // document.body.querySelectorAll('.project').forEach((e)=>{
+        //     e.innerHTML = ''
+        // })
+        // await getData()
+        location.reload()
     }
 
     console.log(projectCards.find(el => el.container === card).id)
@@ -207,8 +243,61 @@ function archiveProject(card) {
     console.log()
 
 }
+function unarchiveProject (card) {
+    const dialog = document.createElement('mdui-dialog')
+    const buttonsContainer = document.createElement('div')
+    const yes = document.createElement('mdui-button')
+    const no = document.createElement('mdui-button')
+    const cardName = card.children[1].children[0].children[0].innerText
+    const snackBar = document.createElement('mdui-snackbar')
+    const id = projectCards.find(el => el.container === card).id
+    snackBar.className = 'snack-bar-delete-project';
+    snackBar.innerText = 'Przywrócono projekt "' + cardName + '".'
+
+
+    document.body.appendChild(snackBar)
+
+    yes.innerText = 'Tak'
+    yes.className = 'yesButton'
+    yes.setAttribute('variant', 'filled')
+    yes.onclick = async function () {
+        card.style.display = 'none';
+        dialog.open = false
+        snackBar.open = true
+        await fetch('api/project/archive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                projectID: id,
+                archived: 1
+            })
+        })
+        // await getData()
+        location.reload()
+    }
+
+    console.log(projectCards.find(el => el.container === card).id)
+    no.innerText = 'Nie'
+    no.className = 'noButton'
+    no.setAttribute('variant', 'tonal')
+    no.onclick = ()=> {
+        dialog.open = false
+    }
+
+    buttonsContainer.appendChild(yes)
+    buttonsContainer.appendChild(no)
+
+    dialog.className = 'delete-project-dialog'
+    document.body.appendChild(dialog)
+    dialog.innerHTML = '<div>Czy chcesz przywrócić projekt ' + '<b>' + '"' + cardName + '"' + '</b>' + '?</div>'
+    dialog.appendChild(buttonsContainer)
+    dialog.open = true
+    console.log()
+}
 const activeTab = document.querySelector('#active-tab')
 const archivedTab = document.querySelector('#archived-tab')
-activeTab.addEventListener('click', e => {
-    document.querySelector('.project-container').classList.toggle('hidden')
-})
+// activeTab.addEventListener('click', e => {
+//     document.querySelector('.project-container').classList.toggle('hidden')
+// })
