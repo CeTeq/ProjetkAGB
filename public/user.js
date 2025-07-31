@@ -2,7 +2,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const myParam = urlParams.get('err');
 const username = urlParams.get('username');
 const lastProject = urlParams.get('lastProject');
-const projectCards = []
+let projectCards = []
 console.log(username);
 console.log(myParam);
 const error = document.getElementById('error');
@@ -15,6 +15,10 @@ if(lastProject) {
 
 async function getData() {
     const url = "/api/getProjects"
+    projectCards = []
+    // console.log(document.querySelector('projects-archived').children)
+    document.body.querySelector('.projects-active').innerHTML = ''
+    document.body.querySelector('.projects-archived').innerHTML = ''
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -94,9 +98,9 @@ async function getData() {
             project.querySelector("h3").innerText = element.name;
             project.querySelector(".description").innerText = element.description || "Brak opisu";
             project.querySelector(".company-name").innerText = element.company ? `${element.company.name}; ${element.company.street}` : "N/A";
-            document.body.querySelectorAll('.project').forEach((e)=>{
-                e.innerHTML = ''
-            })
+            // document.body.querySelectorAll('.project').forEach((e)=>{
+            //     e.innerHTML = ''
+            // })
             projectContainer.appendChild(project)
             if(element.archived === 2) {
                 // projectContainer.classList.add('archived')
@@ -195,7 +199,8 @@ function archiveProject(card) {
                 archived: 1
             })
         })
-        location.reload()
+        await getData()
+        //location.reload()
     })
 
     document.body.appendChild(snackBar)
@@ -220,8 +225,8 @@ function archiveProject(card) {
         // document.body.querySelectorAll('.project').forEach((e)=>{
         //     e.innerHTML = ''
         // })
-        // await getData()
-        location.reload()
+        await getData()
+        //location.reload()
     }
 
     console.log(projectCards.find(el => el.container === card).id)
@@ -274,8 +279,8 @@ function unarchiveProject (card) {
                 archived: 1
             })
         })
-        // await getData()
-        location.reload()
+        await getData()
+        ////location.reload()
     }
 
     console.log(projectCards.find(el => el.container === card).id)
@@ -296,8 +301,15 @@ function unarchiveProject (card) {
     dialog.open = true
     console.log()
 }
-const activeTab = document.querySelector('#active-tab')
-const archivedTab = document.querySelector('#archived-tab')
-// activeTab.addEventListener('click', e => {
-//     document.querySelector('.project-container').classList.toggle('hidden')
+// document.querySelector('mdui-tabs').addEventListener('click', async function (event) {
+//     document.body.getElementsByClassName('.projects-archived').innerHtml = ''
+//     document.querySelectorAll('.projects-archived').forEach((element)=> {
+//         const list = element.children[0].children
+//
+//         for (let j = 0; j < list.length; j++) {
+//             document.body.removeChild(list[j])
+//         }
+//     })
+//     document.querySelector('.projects-active').innerHtml = ''
+//     // await getData()
 // })
