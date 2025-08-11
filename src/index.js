@@ -42,12 +42,19 @@ function isAuthenticated(req, res, next) {
     }
 }
 function isAuthorized(req, requiredPermissions){
-    console.log(requiredPermissions);
-    const stmt = db.prepare('SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);')
-    const perm = stmt.get(req.session.userID, req.body.projectID).permission
-    if(!perm || perm === 0) return false
-    else if (perm < requiredPermissions) return false
-    else return true
+    let stmt = db.prepare('SELECT type FROM users WHERE id==(?)')
+    const userType = stmt.get(req.session.userID);
+    console.log('User type: ', userType)
+    if(!requiredPermissions.isInteger && requiredPermissions !== 'admin') return false
+    else if(userType.type !== 'admin') {
+        console.log(requiredPermissions);
+        stmt = db.prepare('SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);')
+        // console.log(stmt.get(req.session.userID, req.body.projectID))
+        const perm = stmt.run(req.session.userID, req.body.projectID).permission
+        if (!perm || perm === 0) return false
+        else if (perm < requiredPermissions) return false
+        else return true
+    } else return true
 }
 
 app.get('/', isAuthenticated, function (req, res) {
@@ -203,9 +210,22 @@ app.get('/api/getProjects', isAuthenticated, (req, res) => {
     res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
 
+app.post('/api/createProject', isAuthenticated, async function (req, res) {
+    if(!isAuthorized(req, 'admin')) return res.status(401).send('No permissions.');
+    if(!req.body || !req.body.projectName) return res.status(400).send('Bad request');
+    let stmt = db.prepare('INSERT INTO Project (name) VALUES (?)')
+    stmt.run(req.body.projectName)
+    stmt = db.prepare('SELECT id FROM `Project` ORDER BY id DESC LIMIT 1')
+    const projectID = await stmt.run().lastInsertRowid
+    console.log(projectID, 'project')
+    stmt = db.prepare('INSERT INTO permissions (user_id, permission, project_id) VALUES ((?), (?), (?))')
+    stmt.run(req.session.userID, 7, projectID)
+    res.redirect('/project.html?id=' + projectID)
+})
 app.post('/api/project/setPricingList', isAuthenticated, async function (req, res) {
     let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
     console.log(req.body)
+
     stmt.run(req.body.pricingList, req.body.projectID)
     res.sendStatus(200)
 })
