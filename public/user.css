@@ -58,7 +58,54 @@ body {
 .more-project {
     display: none;
 }
+input[type=text], input[type=password], input[type=date] {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 8px;
+    margin-block: 5px;
+    margin-inline: 2px;
+    background: white;
+}
 
+
+button.primary, input[type=submit] {
+    background: #314578;
+    color: white;
+    border-radius: 8px;
+    padding-block: 12px;
+    border: none;
+}
+
+button.secondary {
+    color: white;
+    background-color: #6d6f78;
+    border: none;
+}
+
+button.success {
+    color: white;
+    background-color: #3ba55c;
+    border: none;
+}
+
+button.danger {
+    color: white;
+    background-color: #f04847;
+    border: none;
+}
+
+button {
+    border-radius: 8px;
+    padding-block: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*cursor: pointer;*/
+}
+
+button.login {
+    width: 100%;
+}
 @media screen and (min-width: 600px) {
     .project-card {
         min-width: 150px;
@@ -158,5 +205,20 @@ body {
     }
     mdui-top-app-bar {
         display: none;
+    }
+    #ccas {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+    }
+    .createProject > input {
+
+    }
+    #newProjectForm {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
     }
 }

@@ -17,8 +17,8 @@ async function getData() {
     const url = "/api/getProjects"
     projectCards = []
     // console.log(document.querySelector('projects-archived').children)
-    document.body.querySelector('.projects-active').innerHTML = ''
-    document.body.querySelector('.projects-archived').innerHTML = ''
+    document.querySelector('.projects-active').innerHTML = ''
+    document.querySelector('.projects-archived').innerHTML = ''
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -38,15 +38,18 @@ async function getData() {
                 const more = document.createElement('mdui-dropdown');
                 const dropdownTrigger = document.createElement('mdui-button-icon')
                 const dropdownMenu = document.createElement('mdui-menu')
-                const menuItem1 = document.createElement('mdui-menu-item');
+                // const menuItem1 = document.createElement('mdui-menu-item');
                 const menuItem2 = document.createElement('mdui-menu-item');
 
-                menuItem1.innerText = 'Edytuj'
+                // menuItem1.innerText = 'Edytuj'
                 menuItem2.innerText = 'Zarchiwizuj'
+                // menuItem1.addEventListener('click', () => {
+                //     editMode();
+                // })
                 menuItem2.addEventListener('click', (e) => {
                     archiveProject(e.target.closest('.project-container'));
                 })
-                dropdownMenu.appendChild(menuItem1);
+                // dropdownMenu.appendChild(menuItem1);
                 dropdownMenu.appendChild(menuItem2);
 
                 dropdownTrigger.setAttribute('icon', 'more_vert')
@@ -164,17 +167,30 @@ getData();
 //         console.log(i)
 //     })
 // }
-function editMode() {
-    projectCards.forEach((element) => {
-        const button = document.createElement('mdui-button-icon')
-        const card = element.container.children[0];
-
-        button.setAttribute('icon', 'delete')
-        button.classList.add('delete-project');
-        element.container.setAttribute("disabled", "");
-        element.container.appendChild(button)
-        card.href = + '<b>' + '"' + cardName + '".' + '</b>'
+function newProject() {
+    const dialog = document.createElement('mdui-dialog');
+    dialog.className = 'createProject'
+    dialog.setAttribute('close-on-overlay-click', '');
+    dialog.innerHTML = `
+        <div id="ccas">
+            <form method="POST" action="/api/createProject" id="newProjectForm">
+                <label>Nazwa projektu:</label>
+                <input type="text" id="projectName" name="projectName" required>
+                <mdui-button disabled onclick="createProject()" id="createProject">Utwórz</mdui-button>
+            </form>
+        </div>
+    `
+    document.body.appendChild(dialog);
+    dialog.open = true;
+    document.querySelector('#projectName').addEventListener('input', (e) => {
+        if(document.querySelector('#projectName').value) {
+            document.getElementById('createProject').removeAttribute('disabled')
+        }
+        else document.getElementById('createProject').setAttribute('disabled', '')
     })
+}
+function createProject() {
+
 }
 function archiveProject(card) {
     const dialog = document.createElement('mdui-dialog')
@@ -186,6 +202,7 @@ function archiveProject(card) {
     const id = projectCards.find(el => el.container === card).id
     snackBar.className = 'snack-bar-delete-project';
     snackBar.setAttribute('action', 'Cofnij')
+    snackBar.setAttribute('close-on-outside-click', '')
     snackBar.innerText = 'Zarchiwizowano projekt "' + cardName + '".'
     snackBar.addEventListener('action-click', async ()=>{
         card.style.display = 'block';
@@ -301,15 +318,3 @@ function unarchiveProject (card) {
     dialog.open = true
     console.log()
 }
-// document.querySelector('mdui-tabs').addEventListener('click', async function (event) {
-//     document.body.getElementsByClassName('.projects-archived').innerHtml = ''
-//     document.querySelectorAll('.projects-archived').forEach((element)=> {
-//         const list = element.children[0].children
-//
-//         for (let j = 0; j < list.length; j++) {
-//             document.body.removeChild(list[j])
-//         }
-//     })
-//     document.querySelector('.projects-active').innerHtml = ''
-//     // await getData()
-// })
