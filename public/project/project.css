@@ -1,0 +1,107 @@
+body{
+    font-family: "Roboto", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings:
+            "wdth" 100;
+    margin: 0;
+}
+.mdui-top-app-bar {
+    /*border-bottom: solid 1px lightgray;*/
+    /*box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.01);*/
+    text-align: center;
+}
+#phoneADD {
+    display: none;
+}
+.pricingListDisplay {
+     position: absolute;
+     padding-top: 10px;
+     left: 5%;
+     display: flex;
+     align-items: flex-start;
+     justify-items: center;
+     width: 90%;
+     flex-direction: column;
+ }
+
+table, th, td {
+    border-top: 1px solid #F39F81;
+    border-bottom: 1px solid #F39F81;
+    border-collapse: collapse;
+    font-size: 20px;
+    width: 100%;
+}
+th {
+    height: 20px;
+    padding-left: 2px;
+    padding-right: 2px;
+    background-color: #F39F81;
+    text-align: center;
+    font-weight: bold;
+    text-align: left;
+}
+
+td {
+    text-align: left;
+    min-width: 80px;
+}
+td:nth-child(2) {
+    padding-right: 7px;
+}
+td:nth-child(3) {
+    padding-left: 7px;
+    border-left: #F39F81 solid 1px;
+}
+@media screen and (max-width: 600px) {
+    body{
+        /*padding-bottom: 60px;*/
+    }
+    .project-container {
+        display: flex;
+        width: 90%;
+        margin-left: 5%;
+    }
+    .item-card {
+        width: 100%;
+        padding: 0 10px 10px 10px;
+        min-height: 120px;
+    }
+    input[type=number] {
+        margin-left: 75%;
+        border: 1px solid gray;
+        border-radius: 5px;
+        padding: 1px;
+        width: 20%;
+    }
+    .item-container {
+        position: relative;
+        display: flex;
+        width: 90%;
+        margin-left: 5%;
+        margin-top: 10px;
+    }
+    .item-container:last-of-type {
+        margin-bottom: 70px;
+    }
+    .more-item {
+        display: block;
+        position: absolute;
+        align-self: flex-start;
+        margin-top: 0px;
+        left: 90%;
+        z-index: 1;
+    }
+    #phoneADD {
+        position: fixed;
+        display: block;
+        bottom: 15px;
+        right: 15px;
+        z-index: 9999;
+    }
+}
+@media print {
+    #print { display: none; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+}

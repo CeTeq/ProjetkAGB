@@ -89,14 +89,14 @@ async function getData() {
                     <div>
                     <h3></h3>
                     <div class="company">
-                        <img src="./company.svg">
+                        <img src="/project/company.svg">
                         <span class="company-name"></span>
                     </div>
                     <div class="description"></div>
                     </div>
                 `
 
-            project.href = `/project.html?id=${element.id}`;
+            project.href = `/project/index.html?id=${element.id}`;
 
             project.querySelector("h3").innerText = element.name;
             project.querySelector(".description").innerText = element.description || "Brak opisu";
