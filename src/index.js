@@ -220,7 +220,7 @@ app.post('/api/createProject', isAuthenticated, async function (req, res) {
     console.log(projectID, 'project')
     stmt = db.prepare('INSERT INTO permissions (user_id, permission, project_id) VALUES ((?), (?), (?))')
     stmt.run(req.session.userID, 7, projectID)
-    res.redirect('/project.html?id=' + projectID)
+    res.redirect('/project/index.html?id=' + projectID)
 })
 app.post('/api/project/setPricingList', isAuthenticated, async function (req, res) {
     let stmt = db.prepare('UPDATE `Project` SET shrack_pricing_list_id = (?) where id = (?)');
