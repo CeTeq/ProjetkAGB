@@ -1,7 +1,8 @@
 const urlParams = new URLSearchParams(window.location.search);
 const projectID = urlParams.get('id');
 let productsDisplay, searchBar
-const itemsList = []
+let itemsList = []
+let allItemsList = []
 console.log(projectID)
 
 async function getData() {
@@ -26,8 +27,6 @@ getData();
 
 async function displayItems(item) {
     item.forEach(item => {
-        itemsList.push(item)
-
         const itemContainer = document.createElement("div");
         itemContainer.className = 'item-container';
         const more = document.createElement('mdui-dropdown');
@@ -57,22 +56,32 @@ async function displayItems(item) {
 <!--                        <img src="/project/company.svg">-->
                         <mdui-icon name='image'></mdui-icon>
                         <span class="item-name"></span>
-                        <input type="number" class="amount">
+                        <mdui-text-field class="amount" variant="outlined"></mdui-text-field>
                     </div>
                     <div class="description"></div>
                     </div>
                 `
         projectCard.querySelector("h3").innerText = item.name;
-        projectCard.querySelector('.amount').value = item.number;
+        let amountInput = projectCard.querySelector('.amount')
+        amountInput.value = item.number;
+        amountInput.addEventListener('input', (e) => {
+            updateItem(item, e.target.value);
+            console.log('item: ', item);
+        })
         // projectCard.querySelector('.item-name').innerText = item.name;
         projectCard.className = 'item-card'
         itemContainer.appendChild(projectCard);
+        itemsList.push({
+            item: item,
+            itemContainer: itemContainer,
+        })
         document.querySelector('.projectCards').appendChild(itemContainer);
     })
 }
 let productslist = []
 async function displayPricinglist(products) {
     const table =  document.createElement('table');
+    table.className = 'pricing-table';
     const rowH = document.createElement('tr')
     const nameH = document.createElement('th')
     nameH.textContent = 'Nazwa produktu';
@@ -100,8 +109,8 @@ async function displayPricinglist(products) {
     })
     let sum = 0;
 
-    itemsList.forEach(item => {
-        sum = sum + item.price * item.number;
+    itemsList.forEach(element => {
+        sum = sum + element.item.price * element.item.number;
     })
     console.log(sum);
     // table.innerHTML += '<tr><td><button onclick="addElement()">Add element</button><div id="adder"></div></td></tr>';
@@ -110,4 +119,173 @@ async function displayPricinglist(products) {
     }))
 
     document.querySelector(".pricingListDisplay").appendChild(table)
+}
+
+async function addItemDialog() {
+    allItemsList.splice(0, allItemsList.length);
+    const url = "/api/getProducts";
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const json = await response.json();
+        console.log(json);
+        json.forEach((element) =>{
+            const item = document.createElement('mdui-list-item');
+            let inUse = false
+            if (itemsList.some(el => el.item.id === element.id)) inUse = true;
+            console.log(inUse)
+            item.innerText = element.name;
+            allItemsList.push({
+                html: item,
+                item: element,
+                inUse: inUse
+            });
+        })
+
+    } catch (error) {
+        console.error(error.message);
+    }
+
+    const dialog = document.createElement('mdui-dialog');
+    dialog.setAttribute('close-on-overlay-click', '');
+    // dialog.className = 'add-item'
+    dialog.innerHTML =
+        `<div class="add-item">
+            <div><mdui-text-field type="text" id="searchBar"><mdui-button-icon icon="add" id="addItemConfirm"></mdui-button-icon> </div>
+            <mdui-list id="item-list"></mdui-list>
+        </div>`
+    const itemList = dialog.querySelector('#item-list');
+    const searchBar = dialog.querySelector('#searchBar');
+    let selectedItemID
+
+    allItemsList.forEach(element => {
+        if(element.inUse) {
+            element.html.style.cursor = 'not-allowed';
+            element.html.setAttribute('disabled', '')
+        } else {
+            element.html.addEventListener('click', async (e) => {
+                searchBar.value = element.item.name
+                selectedItemID = element.item.id
+                console.log(allItemsList.find(el => el.item.id === selectedItemID).item.id)
+                dialog.open = false
+                const url = "/api/project/addNewelement";
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            number: 1,
+                            productID: selectedItemID,
+                            projectID: projectID
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    }
+
+                } catch (error) {
+                    console.error(error.message);
+                }
+            })
+        }
+        itemList.appendChild(element.html);
+    })
+
+    searchBar.addEventListener('input', (event) => {
+        const value = event.target.value.toLowerCase();
+        allItemsList.forEach(product => {
+            if (product.item.name.toLowerCase().includes(value)) {
+                if (itemsList.some(el => el.id === product.item.id)) product.html.style.color = 'gray'
+                product.html.style.display = 'block'
+            } else product.html.style.display = 'none';
+        });
+    });
+
+    document.body.appendChild(dialog);
+
+    dialog.open = true
+}
+async function addItem() {}
+// searchBar.addEventListener('input', (event) => {
+//     const value = event.target.value.toLowerCase();
+//     newProducts.forEach(product => {
+//         if (product.name.toLowerCase().includes(value)) {
+//             if (productslist.some(el => el.id === product.id)) product.element.style.color = 'gray'
+//             product.element.style.display = 'block'
+//         } else product.element.style.display = 'none';
+//     });
+// });
+const pendingChanges = new Map
+let unsavedChanges = false
+const ucSnakcBar = document.createElement('mdui-snackbar')
+ucSnakcBar.setAttribute('action', 'Zapisz')
+ucSnakcBar.setAttribute('auto-close-delay', '0')
+ucSnakcBar.setAttribute('close-on-outside-click', 'false')
+ucSnakcBar.innerText = 'Masz niezapisane zmiany'
+ucSnakcBar.addEventListener('action-click', async () => {
+    if(pendingChanges.size > 0) {
+        console.log(pendingChanges)
+        ucSnakcBar.open = false
+        await uploadChanges()
+
+    }
+})
+document.body.appendChild(ucSnakcBar);
+
+async function updateItem(item, amount) {
+    if(item && amount){
+        pendingChanges.set(item.id, item)
+        if(item.number == amount && pendingChanges.has(item.id)) {
+            pendingChanges.delete(item.id)
+            if(pendingChanges.size === 0) {
+                ucSnakcBar.open = false
+            }
+        }
+        else {
+            pendingChanges.set(item.id, amount)
+            ucSnakcBar.open = true
+            if(!unsavedChanges) {
+                unsavedChanges = true
+            }
+        }
+    }
+}
+async function uploadChanges(){
+    const items = []
+    let index
+    pendingChanges.forEach( (value, key) => {
+        let a = productslist.find(el => el.id === key)
+        console.log('a', productslist.find(el => el.id === key))
+        items.push({
+            amount: value,
+            projectID: projectID,
+            productID: a.id,
+        })
+    })
+    await fetch('/api/project/updateItem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                items: items
+            })
+        })
+    reloadProject()
+}
+
+async function reloadProject() {
+    itemsList = []
+    allItemsList = []
+    productslist = []
+    document.querySelectorAll('.item-container').forEach(e => {
+        document.querySelector('.projectCards').removeChild(e)
+    })
+    console.log(document.querySelector('.pricing-table'))
+    document.querySelector('.pricingListDisplay').removeChild(document.querySelector('.pricing-table'))
+    await getData()
 }
