@@ -32,7 +32,7 @@ app.use((req, res, next) => {
         res.redirect('/login.html')
     }
 })
-app.use(express.static('public'))
+
 
 function isAuthenticated(req, res, next) {
     if (req.session.user && req.session.userID) next();
@@ -45,7 +45,10 @@ function isAuthorized(req, requiredPermissions){
     let stmt = db.prepare('SELECT type FROM users WHERE id==(?)')
     const userType = stmt.get(req.session.userID);
     console.log('User type: ', userType)
+    console.log(req.session, "req.session");
+    if(userType.type === 'admin') return true
     if(!requiredPermissions.isInteger && requiredPermissions !== 'admin') return false
+    else if(!requiredPermissions.isInteger && requiredPermissions === 'admin') return true
     else if(userType.type !== 'admin') {
         console.log(requiredPermissions);
         stmt = db.prepare('SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);')
@@ -125,7 +128,7 @@ app.post('/api/register', function (req, res) {
         });
     });
 });
-
+app.use(express.static('public'))
 app.get('/api/logout', function (req, res, next) {
     req.session.user = null;
     req.session.save(function (err) {
@@ -193,7 +196,7 @@ app.get('/api/project/pricingList', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT *, (select Project.shrack_pricing_list_id from project where id = (?)) as inUse FROM shrack_cennik ;")
     res.json(stmt.all(req.query.id));
 })
-app.get('/api/products', isAuthenticated, async function (req, res) {
+app.get('/api/getProducts', isAuthenticated, async function (req, res) {
     let stmt = db.prepare('SELECT * FROM `products`')
     const products = stmt.all()
     stmt = db.prepare('SELECT * FROM `project_products`')
@@ -240,15 +243,20 @@ app.post('/api/project/addNewelement', isAuthenticated, async function (req, res
     if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
     if(!req.body.number || !req.body.productID) return res.status(400).send('Bad request.')
     if(!req.body.projectID || !req.body.productID) return
-    if(req.body.number <= 0 || !req.body.number.isInteger()) return res.status(400).send('Invalid amount.')
+    if(req.body.number <= 0 || typeof(req.body.number) !== 'number') return res.status(400).send('Invalid amount.')
     const stmt = db.prepare('INSERT INTO `project_products` (project_id, product_id, number) VALUES (?, ?, ?)')
-    console.log(stmt.run(req.body.projectID, req.body.productID, req.body.amount))
+    console.log(stmt.run(req.body.projectID, req.body.productID, req.body.amount || 1))
     res.status(200).send('ok')
 })
 app.post('/api/project/updateItem', isAuthenticated, async function (req, res) {
     if(!isAuthorized(req, 2)) return res.status(401).send('No permissions.');
+    if(!req.body || !req.body.items) return res.status(400).send('Bad request. No items provided.');
     const stmt = db.prepare('UPDATE `project_products` SET number = (?) where product_id = (?) and project_id = (?)')
-    stmt.run(req.body.amount, req.body.productID, req.body.projectID)
+    console.log(req.body)
+    req.body.items.forEach((item) => {
+        stmt.run(item.amount, item.productID, item.projectID)
+        console.log('Item: ', item)
+    })
     res.status(200).send('ok')
 })
 app.post('/api/project/newProject', isAuthenticated, async function (req, res) {

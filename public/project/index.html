@@ -26,15 +26,15 @@
     <mdui-layout-main>
         <mdui-tabs class="project-nav" value="active" full-width>
             <mdui-tab value="active">Produkty</mdui-tab>
-            <mdui-tab value="pricingList">Kosztorys</mdui-tab>
+            <mdui-tab value="pricingList" class="pricingListTab">Kosztorys</mdui-tab>
             <mdui-tab value="data">Dane</mdui-tab>
 
             <mdui-tab-panel value="active" slot="panel">
                 <div class="projectCards"></div>
-                <mdui-fab id="phoneADD" onclick="newProject()" icon="add"></mdui-fab>
+                <mdui-fab id="phoneADD" onclick="addItemDialog()" icon="add"></mdui-fab>
             </mdui-tab-panel>
             <mdui-tab-panel value="pricingList" slot="panel">
-                <mdui-layout-item class="pricingListDisplay">
+                <mdui-layout-item class="pricingListDisplay print">
 
                 </mdui-layout-item>
             </mdui-tab-panel>
