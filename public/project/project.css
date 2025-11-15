@@ -134,6 +134,19 @@ td:nth-child(3) {
         width: 20%;
         text-align: center;
     }
+    .delete-popup {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+    .delete-popup > mdui-button {
+        margin-top: 15px;
+        margin-bottom: 0px;
+    }
+
 }
 @media print {
     /*#print { display: none; }*/
