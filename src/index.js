@@ -212,7 +212,6 @@ app.get('/api/getProjects', isAuthenticated, (req, res) => {
     let stmt = db.prepare("select project.id, project.name, project.archived, permissions.permission from `project` inner join `permissions` on permissions.project_id = project.id where permissions.user_id = (?) and permissions.permission > 0;");
     res.send(stmt.all(JSON.stringify(req.session.userID)))
 })
-
 app.post('/api/createProject', isAuthenticated, async function (req, res) {
     if(!isAuthorized(req, 'admin')) return res.status(401).send('No permissions.');
     if(!req.body || !req.body.projectName) return res.status(400).send('Bad request');

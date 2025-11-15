@@ -36,7 +36,7 @@ async function displayItems(item) {
 
         menuItem1.innerText = 'Usuń';
         menuItem1.addEventListener('click', (e) => {
-            unarchiveProject(e.target.closest('.project-container'));
+            deleteItem(item);
         })
 
         dropdownMenu.appendChild(menuItem1);
@@ -190,6 +190,7 @@ async function addItemDialog() {
                 } catch (error) {
                     console.error(error.message);
                 }
+                await reloadProject()
             })
         }
         itemList.appendChild(element.html);
@@ -288,4 +289,45 @@ async function reloadProject() {
     console.log(document.querySelector('.pricing-table'))
     document.querySelector('.pricingListDisplay').removeChild(document.querySelector('.pricing-table'))
     await getData()
+}
+const deletePopup = document.createElement('mdui-dialog');
+deletePopup.innerText = ''
+deletePopup.className = 'delete-popup'
+const delteSnackbar = document.createElement('mdui-snackbar')
+async function deleteItem(element) {
+    console.log(element)
+    deletePopup.innerText = 'Czy na pewno chcesz usunąć element \"' + element.name + '\"?'
+    deletePopup.setAttribute('close-on-overlay-click', '')
+    const deleteConfirmButton = document.createElement('mdui-button')
+    deleteConfirmButton.innerText = 'Usuń'
+    deleteConfirmButton.className = 'mdui-text-color-red'
+    deletePopup.appendChild(document.createElement('br'))
+    deletePopup.appendChild(deleteConfirmButton)
+
+    document.body.append(deletePopup)
+    deletePopup.open = true
+    deleteConfirmButton.addEventListener('click', async () => {
+        deletePopup.open = false
+        const url = "/api/project/deleteItem";
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productID: element.id,
+                    projectID: projectID
+                })
+            });
+            console.log(response)
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+        } catch (error)
+        {
+            console.error(error.message);
+        }
+    await reloadProject()})
+    console.log(deletePopup.innerText)
 }
