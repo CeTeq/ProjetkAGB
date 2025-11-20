@@ -4,7 +4,7 @@ let productsDisplay, searchBar
 let itemsList = []
 let allItemsList = []
 console.log(projectID)
-
+let client
 async function getData() {
     const url = "/api/project?id=" + projectID;
     try {
@@ -15,15 +15,27 @@ async function getData() {
         const json = await response.json();
         console.log(json);
         document.title = json.name;
-        document.querySelector("mdui-top-app-bar-title").innerText = json.name;
+        const topBar = document.querySelector('mdui-top-app-bar');
+        const mduiTitle = document.createElement("mdui-top-app-bar-title");
+        const goBackButton = document.createElement("mdui-button-icon");
+        goBackButton.className = "goBackButton";
+        goBackButton.setAttribute('icon', 'arrow_back');
+        topBar.appendChild(goBackButton);
+        goBackButton.addEventListener('click', () => window.location.href = '/user.html')
+
+        topBar.appendChild(mduiTitle);
+        mduiTitle.innerText = json.name;
         await displayItems(json.items)
         await displayPricinglist(json.items)
+        client = json.client
+        await projectData(client)
     } catch (error) {
         console.error(error.message);
     }
 
 }
-getData();
+
+document.addEventListener('DOMContentLoaded', getData);
 
 async function displayItems(item) {
     item.forEach(item => {
@@ -101,24 +113,62 @@ async function displayPricinglist(products) {
         const number = document.createElement('td');
         number.textContent = item.number;
         const price = document.createElement('td');
-        price.textContent = item.price + ' ' + item.currency
+        price.textContent = parseInt(item.price) * item.number + ' ' + item.currency
         tr.appendChild(name);
         tr.appendChild(number);
         tr.appendChild(price);
         return {name: item.name, id: item.id, number: number, price: price,  element: tr};
     })
-    let sum = 0;
 
+    let sum = 0;
     itemsList.forEach(element => {
         sum = sum + element.item.price * element.item.number;
+
     })
-    console.log(sum);
+
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'total-row'
+    const totalName = document.createElement('td');
+    totalName.textContent = 'Łącznie:';
+    const td = document.createElement('td');
+    const totalAmount = document.createElement('td');
+    totalAmount.textContent = sum + ' EUR';
+    totalRow.appendChild(totalName);
+    totalRow.appendChild(td)
+    totalRow.appendChild(totalAmount);
+    const totalVatRow = document.createElement('tr');
+    totalVatRow.className = 'total-vat-row'
+    const td1 = document.createElement('td');
+    totalVatRow.appendChild(td1);
+    const totalVatName = document.createElement('td');
+    totalVatName.textContent = 'Łącznie z VAT (23%):';
+    const vatSum = document.createElement('td')
+    vatSum.textContent = (sum * 1.23).toFixed(2) + ' EUR';
+    totalVatRow.appendChild(totalVatName);
+    totalVatRow.appendChild(vatSum);
     // table.innerHTML += '<tr><td><button onclick="addElement()">Add element</button><div id="adder"></div></td></tr>';
+
     productslist.forEach((item => {
         table.appendChild(item.element);
     }))
-
+    table.appendChild(totalRow);
+    table.appendChild(totalVatRow);
     document.querySelector(".pricingListDisplay").appendChild(table)
+}
+async function projectData(client) {
+    console.log('client: ', client)
+    console.log('co jest')
+    const clientTab = document.querySelector('.client-data-tab')
+    const table = document.createElement('table');
+    table.classList.add('mdui-table')
+    table.classList.add('client-data-table');
+    table.innerHTML = `
+    <tr><th>Nazwa klienta:</th><td>${client.name || 'Brak'}</td></tr>
+    <tr><th>Miasto:</th><td>${client.city || 'Brak'}</td></tr>
+    <tr><th>Ulica:</th><td>${client.street || "Brak"} ${client.street_number || ""}</td></tr>
+    <tr><th>Opis:</th><td>${client.description || 'Brak'}</td></tr>
+    <tr><th>Data stworzenia:</th><td>${client.date}</td></tr>`
+    clientTab.appendChild(table)
 }
 
 async function addItemDialog() {
