@@ -26,34 +26,38 @@ body{
      flex-direction: column;
  }
 
-table, th, td {
-    border-top: 1px solid #F39F81;
-    border-bottom: 1px solid #F39F81;
+.pricing-table {
     border-collapse: collapse;
     font-size: 20px;
     width: 100%;
 }
-th {
+
+.pricing-table, .pricing-table th, .pricing-table td {
+    border-top: 1px solid #F39F81;
+    border-bottom: 1px solid #F39F81;
+}
+
+.pricing-table th {
     height: 20px;
     padding-left: 2px;
     padding-right: 2px;
     background-color: #F39F81;
-    text-align: center;
-    font-weight: bold;
     text-align: left;
+    font-weight: bold;
 }
 
-td {
+.pricing-table td {
     text-align: left;
     min-width: 80px;
 }
-td:nth-child(2) {
+.pricing-table td:nth-child(2) {
     padding-right: 7px;
 }
-td:nth-child(3) {
+.pricing-table td:nth-child(3) {
     padding-left: 7px;
     border-left: #F39F81 solid 1px;
 }
+
 @media screen and (max-width: 600px) {
     body{
         /*padding-bottom: 60px;*/
@@ -146,11 +150,14 @@ td:nth-child(3) {
         margin-top: 15px;
         margin-bottom: 0px;
     }
+    .client-data-table {
+        border-collapse: collapse;
+    }
 
 }
 @media print {
     /*#print { display: none; }*/
-    tr:nth-child(even) { background-color: #f2f2f2; }
+    .pricing-table tr:nth-child(even) { background-color: #f2f2f2; }
     mdui-top-app-bar {
         display: none;
     }
