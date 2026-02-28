@@ -32,7 +32,7 @@
 
             <mdui-tab-panel value="active" slot="panel">
                 <div class="projectCards"></div>
-                <mdui-fab id="phoneADD" onclick="addItemDialog()" icon="add"></mdui-fab>
+                <mdui-fab id="phoneADD" onclick="addItemDialog()" icon="add" class="phone"></mdui-fab>
             </mdui-tab-panel>
             <mdui-tab-panel value="pricingList" slot="panel">
                 <mdui-layout-item class="pricingListDisplay print">
@@ -41,7 +41,7 @@
             </mdui-tab-panel>
             <mdui-tab-panel value="data" slot="panel">
                 <div class="client-data-tab">
-
+                    <mdui-fab id="editProjectInformation" onclick="editProjectInformation()" icon="edit" class="phone, floatingFab"></mdui-fab>
                 </div>
             </mdui-tab-panel>
         </mdui-tabs>
