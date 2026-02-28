@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "body-parser": "^2.2.0",
     "cjs": "^0.0.11",
     "express": "^4.21.2",

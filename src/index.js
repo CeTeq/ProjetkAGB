@@ -13,6 +13,7 @@ const port = 3000;
 export const db = new Database('users.db', { verbose: console.log });
 
 const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,7 +33,8 @@ app.use((req, res, next) => {
         res.redirect('/login.html')
     }
 })
-
+// app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, '../public')));
 
 function isAuthenticated(req, res, next) {
     if (req.session.user && req.session.userID) next();
@@ -59,7 +61,20 @@ function isAuthorized(req, requiredPermissions){
         else return true
     } else return true
 }
-
+function permissionsLevel(req) {
+    //Permissions are handled like in  Unix systems rwa (read, write, admin)
+    let stmt = db.prepare('SELECT type FROM users WHERE id==(?)')
+    const projectID = req.session.userID ||  req.query.id
+    console.log('projectID: ', projectID)
+    const userType = stmt.get(req.session.userID).type;
+    if(userType === 'admin') return 7
+    else {
+        console.log('req.body: ', req)
+        stmt = db.prepare("SELECT permission FROM 'permissions' WHERE user_id = (?) AND project_id = (?);")
+        const perm = stmt.run(req.session.userID, projectID).permission
+        return perm || 0
+    }
+}
 app.get('/', isAuthenticated, function (req, res) {
     // const filePath = path.resolve('./public/user.html');
     // res.sendFile(filePath);
@@ -128,7 +143,7 @@ app.post('/api/register', function (req, res) {
         });
     });
 });
-app.use(express.static('public'))
+// app.use(express.static('public')) move to the earlier line
 app.get('/api/logout', function (req, res, next) {
     req.session.user = null;
     req.session.save(function (err) {
@@ -160,12 +175,22 @@ function isPasswordCorrect(password, hash) {
         });
     });
 }
+app.get('/api/projectPermission', isAuthenticated, function (req, res) {
+  if(!req.query || !req.query.projectID) return res.status(400).json('Bad request');
+  let stmt = db.prepare("select `permission` from `permissions` where user_id = (?) AND project_id = (?);");
+  const permission = stmt.get(req.session.userID, req.query.projectID);
+  console.log('Uprawnienia do projektu: ', permission);
+  if (!permission) return res.status(404).json('User has no permission to this project or no project found!');
 
+  console.log(res.status(200).send(permission))
+})
 app.get('/api/project', isAuthenticated, async function (req, res) {
     const stmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = ? AND project_id = ?");
     if(!req.query.id) return res.json('Bad request');
     const perms = stmt.get(1, req.query.id);
-
+    const permissions = permissionsLevel(req);
+    //Przeonoszenie na stronę projektu linkiem
+    console.log('Permissions: ', permissions)
     if (perms.permission !== 0) {
         let stmt = db.prepare("select * from Project where id = (?)");
         const project = stmt.get(req.query.id);
