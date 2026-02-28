@@ -8,7 +8,11 @@ let client
 async function getData() {
     const url = "/api/project?id=" + projectID;
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+        }});
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
@@ -16,6 +20,7 @@ async function getData() {
         console.log(json);
         document.title = json.name;
         const topBar = document.querySelector('mdui-top-app-bar');
+        topBar.innerHTML = ''
         const mduiTitle = document.createElement("mdui-top-app-bar-title");
         const goBackButton = document.createElement("mdui-button-icon");
         goBackButton.className = "goBackButton";
@@ -35,7 +40,7 @@ async function getData() {
 
 }
 
-document.addEventListener('DOMContentLoaded', getData);
+document.addEventListener('DOMContentLoaded', getData(false));
 
 async function displayItems(item) {
     item.forEach(item => {
@@ -159,6 +164,7 @@ async function projectData(client) {
     console.log('client: ', client)
     console.log('co jest')
     const clientTab = document.querySelector('.client-data-tab')
+    clientTab.innerHTML = ''
     const table = document.createElement('table');
     table.classList.add('mdui-table')
     table.classList.add('client-data-table');
@@ -318,15 +324,15 @@ async function uploadChanges(){
         })
     })
     await fetch('/api/project/updateItem', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                items: items
-            })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            items: items
         })
-    reloadProject()
+    })
+    await reloadProject()
 }
 
 async function reloadProject() {
@@ -378,6 +384,26 @@ async function deleteItem(element) {
         {
             console.error(error.message);
         }
-    await reloadProject()})
+        await reloadProject()})
     console.log(deletePopup.innerText)
+}
+
+async function editProjectInformation() {
+    if(await checkPermission() <= 0) return
+    //write code that allows user to edit project data
+
+}
+async function checkPermission() {
+    const url = '/api/projectPermission?projectID=' + projectID
+    try {
+        const response = await fetch(url, { method: 'GET'})
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const data = await response.json();
+        if(!data.permission) return 0
+        return data.permission
+    } catch (error) {
+        throw new Error(`Response status: ${response.status}`);
+    }
 }
