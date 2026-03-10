@@ -40,7 +40,7 @@ async function getData() {
 
 }
 
-document.addEventListener('DOMContentLoaded', getData(false));
+document.addEventListener('DOMContentLoaded', getData());
 
 async function displayItems(item) {
     item.forEach(item => {
@@ -85,7 +85,6 @@ async function displayItems(item) {
             updateItem(item, e.target.value);
             console.log('item: ', item);
         })
-        // projectCard.querySelector('.item-name').innerText = item.name;
         projectCard.className = 'item-card'
         itemContainer.appendChild(projectCard);
         itemsList.push({
@@ -151,7 +150,6 @@ async function displayPricinglist(products) {
     vatSum.textContent = (sum * 1.23).toFixed(2) + ' EUR';
     totalVatRow.appendChild(totalVatName);
     totalVatRow.appendChild(vatSum);
-    // table.innerHTML += '<tr><td><button onclick="addElement()">Add element</button><div id="adder"></div></td></tr>';
 
     productslist.forEach((item => {
         table.appendChild(item.element);
@@ -162,14 +160,13 @@ async function displayPricinglist(products) {
 }
 async function projectData(client) {
     console.log('client: ', client)
-    console.log('co jest')
     const clientTab = document.querySelector('.client-data-tab')
     clientTab.innerHTML = ''
     const table = document.createElement('table');
     table.classList.add('mdui-table')
     table.classList.add('client-data-table');
     table.innerHTML = `
-    <tr><th>Nazwa klienta:</th><td>${client.name || 'Brak'}</td></tr>
+    <tr id="city"><th>Nazwa klienta:</th><td>${client.name || 'Brak'}</td></tr>
     <tr><th>Miasto:</th><td>${client.city || 'Brak'}</td></tr>
     <tr><th>Ulica:</th><td>${client.street || "Brak"} ${client.street_number || ""}</td></tr>
     <tr><th>Opis:</th><td>${client.description || 'Brak'}</td></tr>
@@ -287,7 +284,7 @@ ucSnakcBar.addEventListener('action-click', async () => {
     if(pendingChanges.size > 0) {
         console.log(pendingChanges)
         ucSnakcBar.open = false
-        await uploadChanges()
+        await uploadItemChanges()
 
     }
 })
@@ -305,15 +302,12 @@ async function updateItem(item, amount) {
         else {
             pendingChanges.set(item.id, amount)
             ucSnakcBar.open = true
-            if(!unsavedChanges) {
-                unsavedChanges = true
-            }
+            unsavedChanges = true
         }
     }
 }
-async function uploadChanges(){
+async function uploadItemChanges(){
     const items = []
-    let index
     pendingChanges.forEach( (value, key) => {
         let a = productslist.find(el => el.id === key)
         console.log('a', productslist.find(el => el.id === key))
@@ -390,7 +384,7 @@ async function deleteItem(element) {
 
 async function editProjectInformation() {
     if(await checkPermission() <= 0) return
-    //write code that allows user to edit project data
+    console.log(client)
 
 }
 async function checkPermission() {
