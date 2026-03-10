@@ -1,224 +1,220 @@
-body{
-    margin: 0;
+body {
+  margin: 0;
 }
 .mdui-top-app-bar {
-    /*border-bottom: solid 1px lightgray;*/
-    /*box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.01);*/
-    text-align: center;
+  /*border-bottom: solid 1px lightgray;*/
+  /*box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.01);*/
+  text-align: center;
 }
 .mobile-nav-bar {
-    display: none;
+  display: none;
 }
 .desktop-nav-rail {
-    text-align: center;
-    margin-top: 64px;
+  text-align: center;
+  margin-top: 64px;
 }
 body {
-    font-family: "Roboto", sans-serif;
-    font-optical-sizing: auto;
-    /*font-weight: <weight>;*/
-    font-style: normal;
-    font-variation-settings:
-            "wdth" 100;
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  /*font-weight: <weight>;*/
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
-
 
 .user-nav {
-    display: block;
+  display: block;
 }
-#phoneADD{
-    display: none;
-    z-index: 10;
+#phoneADD {
+  display: none;
+  z-index: 10;
 }
 .project-card {
-    display: flex;
+  display: flex;
 }
 .projects {
-    display: flex;
-    flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
 }
 .projects > mdui-card {
-    text-decoration: none;
-    color: black;
-    /*border: 1px solid black;*/
-    /*margin: 5px;*/
-    padding: 10px;
-    border-radius: 5px;
-    /*width: calc(100svw - 10px);*/
-    user-select: none;
+  text-decoration: none;
+  color: black;
+  /*border: 1px solid black;*/
+  /*margin: 5px;*/
+  padding: 10px;
+  border-radius: 5px;
+  /*width: calc(100svw - 10px);*/
+  user-select: none;
 }
 .top-bar {
-    height: 10px;
+  height: 10px;
 }
 .project-container {
-    position: relative;
-    cursor: pointer;
-    display: flex;
+  position: relative;
+  cursor: pointer;
+  display: flex;
 }
 .more-project {
-    display: none;
+  display: none;
 }
-input[type=text], input[type=password], input[type=date] {
-    border: 1px solid black;
-    padding: 10px;
-    border-radius: 8px;
-    margin-block: 5px;
-    margin-inline: 2px;
-    background: white;
+input[type="text"],
+input[type="password"],
+input[type="date"] {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 8px;
+  margin-block: 5px;
+  margin-inline: 2px;
+  background: white;
 }
 
-
-button.primary, input[type=submit] {
-    background: #314578;
-    color: white;
-    border-radius: 8px;
-    padding-block: 12px;
-    border: none;
+button.primary,
+input[type="submit"] {
+  background: #314578;
+  color: white;
+  border-radius: 8px;
+  padding-block: 12px;
+  border: none;
 }
 
 button.secondary {
-    color: white;
-    background-color: #6d6f78;
-    border: none;
+  color: white;
+  background-color: #6d6f78;
+  border: none;
 }
 
 button.success {
-    color: white;
-    background-color: #3ba55c;
-    border: none;
+  color: white;
+  background-color: #3ba55c;
+  border: none;
 }
 
 button.danger {
-    color: white;
-    background-color: #f04847;
-    border: none;
+  color: white;
+  background-color: #f04847;
+  border: none;
 }
 
 button {
-    border-radius: 8px;
-    padding-block: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /*cursor: pointer;*/
+  border-radius: 8px;
+  padding-block: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*cursor: pointer;*/
 }
 
 button.login {
-    width: 100%;
+  width: 100%;
 }
 @media screen and (min-width: 600px) {
-    .project-card {
-        min-width: 150px;
-        max-width: 250px;
-        margin-left: 10px;
-        padding: 10px;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    .projects > mdui-card {
-        max-width: 250px;
+  .project-card {
+    min-width: 150px;
+    max-width: 250px;
+    margin-left: 10px;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .projects > mdui-card {
+    max-width: 250px;
+  }
+  .projects > mdui-card h3 {
+    margin: 0 0 5px;
+  }
 
-    }
-    .projects > mdui-card h3 {
-        margin: 0 0 5px;
-    }
+  .projects > mdui-card > .company {
+    display: flex;
+    align-items: center;
+  }
 
-    .projects > mdui-card  > .company {
-        display: flex;
-        align-items: center;
-    }
-
-    .projects {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
+  .projects {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 @media screen and (max-width: 600px) {
-    .project-container {
-        display: flex;
-        width: 90%;
-        margin-left: 5%;
-    }
-    .project-card {
-        width: 100%;
-        padding: 10px;
-        min-height: 120px;
-    }
-    .top-bar {
-        display: block;
-    }
-    .project-container {
-        margin-top: 10px;
-    }
-    .project-container:last-of-type {
-        margin-bottom: 10px;
-    }
-    #newProject {
-        width: 80%;
-        left: 5%;
-        top: 15%;
-    }
-    #phoneADD {
-        position: fixed;
-        display: block;
-        bottom: 95px;
-        right: 15px;
-    }
-    #plus {
-        display: none;
-        scroll-behavior: smooth;
-    }
-    .project-nav {
-        display: block;
-    }
-    .mobile-nav-bar {
-        display: block;
-    }
-    .desktop-nav-rail {
-        display: none;
-    }
-    .more-project {
-        display: block;
-        position: absolute;
-        align-self: flex-start;
-        margin-top: 0px;
-        left: 90%;
-        z-index: 1;
-    }
-    mdui-menu > mdui-menu-item {
-        z-index: 9999;
-    }
-    .delete-project-dialog > div:last-child {
-        display: flex;
-        justify-content: center;
-        /*padding-right: 10px;*/
-    }
-    .delete-project-dialog > div:last-child > mdui-button {
-        margin-left: 5px;
-        margin-right: 5px;
-        margin-top: 20px;
-    }
-    .snack-bar-delete-project {
-        display: flex;
-        margin-bottom: 20%;
-    }
-    mdui-top-app-bar {
-        display: none;
-    }
-    #ccas {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-    }
-    .createProject > input {
-
-    }
-    #newProjectForm {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-    }
+  .project-container {
+    display: flex;
+    width: 90%;
+    margin-left: 5%;
+  }
+  .project-card {
+    width: 100%;
+    padding: 10px;
+    min-height: 120px;
+  }
+  .top-bar {
+    display: block;
+  }
+  .project-container {
+    margin-top: 10px;
+  }
+  .project-container:last-of-type {
+    margin-bottom: 10px;
+  }
+  #newProject {
+    width: 80%;
+    left: 5%;
+    top: 15%;
+  }
+  #phoneADD {
+    position: fixed;
+    display: block;
+    bottom: 95px;
+    right: 15px;
+  }
+  #plus {
+    display: none;
+    scroll-behavior: smooth;
+  }
+  .project-nav {
+    display: block;
+  }
+  .mobile-nav-bar {
+    display: block;
+  }
+  .desktop-nav-rail {
+    display: none;
+  }
+  .more-project {
+    display: block;
+    position: absolute;
+    align-self: flex-start;
+    margin-top: 0px;
+    left: 90%;
+    z-index: 1;
+  }
+  mdui-menu > mdui-menu-item {
+    z-index: 9999;
+  }
+  .delete-project-dialog > div:last-child {
+    display: flex;
+    justify-content: center;
+    /*padding-right: 10px;*/
+  }
+  .delete-project-dialog > div:last-child > mdui-button {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 20px;
+  }
+  .snack-bar-delete-project {
+    display: flex;
+    margin-bottom: 20%;
+  }
+  mdui-top-app-bar {
+    display: none;
+  }
+  #ccas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .createProject > input {
+  }
+  #newProjectForm {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
 }
