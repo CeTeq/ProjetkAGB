@@ -5,8 +5,6 @@ import bcrypt from "bcrypt";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import session from "express-session";
-// import {pricingList} from "./pricingList.js";
-// import {all} from "express/lib/application.js";
 
 export const app = express();
 const port = 3000;
@@ -39,7 +37,7 @@ app.use((req, res, next) => {
     res.redirect("/login.html");
   }
 });
-// app.use(express.static('public'))
+
 app.use(express.static(path.join(__dirname, "../public")));
 
 function isAuthenticated(req, res, next) {
@@ -64,7 +62,6 @@ function isAuthorized(req, requiredPermissions) {
     stmt = db.prepare(
       "SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);",
     );
-    // console.log(stmt.get(req.session.userID, req.body.projectID))
     const perm = stmt.run(req.session.userID, req.body.projectID).permission;
     if (!perm || perm === 0) return false;
     else if (perm < requiredPermissions) return false;
@@ -72,7 +69,6 @@ function isAuthorized(req, requiredPermissions) {
   } else return true;
 }
 function permissionsLevel(req) {
-  //Permissions are handled like in  Unix systems rwa (read, write, admin)
   let stmt = db.prepare("SELECT type FROM users WHERE id==(?)");
   const projectID = req.session.userID || req.query.id;
   console.log("projectID: ", projectID);
@@ -88,14 +84,10 @@ function permissionsLevel(req) {
   }
 }
 app.get("/", isAuthenticated, function (req, res) {
-  // const filePath = path.resolve('./public/user.html');
-  // res.sendFile(filePath);
   res.redirect("/user.html?username=" + req.session.user);
 });
 
 app.get("/", function (req, res) {
-  // const filePath = path.resolve('./public/index.html');
-  // res.sendFile(filePath);
   res.redirect("/login.html");
 });
 

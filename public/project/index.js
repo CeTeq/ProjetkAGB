@@ -1,9 +1,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const projectID = urlParams.get("id");
-let productsDisplay, searchBar;
 let itemsList = [];
 let allItemsList = [];
-console.log(projectID);
 let client;
 async function getData() {
   const url = "/api/project?id=" + projectID;
@@ -18,7 +16,6 @@ async function getData() {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    console.log(json);
     document.title = json.name;
     const topBar = document.querySelector("mdui-top-app-bar");
     topBar.innerHTML = "";
@@ -86,7 +83,6 @@ async function displayItems(item) {
     amountInput.value = item.number;
     amountInput.addEventListener("input", (e) => {
       updateItem(item, e.target.value);
-      console.log("item: ", item);
     });
     projectCard.className = "item-card";
     itemContainer.appendChild(projectCard);
@@ -168,7 +164,6 @@ async function displayPricinglist(products) {
   document.querySelector(".pricingListDisplay").appendChild(table);
 }
 async function projectData(client) {
-  console.log("client: ", client);
   const clientTab = document.querySelector(".client-data-tab");
   clientTab.innerHTML = "";
   const table = document.createElement("table");
@@ -176,10 +171,10 @@ async function projectData(client) {
   table.classList.add("client-data-table");
   table.innerHTML = `
     <tr id="city"><th>Nazwa klienta:</th><td>${client.name || "Brak"}</td></tr>
-    <tr><th>Miasto:</th><td>${client.city || "Brak"}</td></tr>
-    <tr><th>Ulica:</th><td>${client.street || "Brak"} ${client.street_number || ""}</td></tr>
-    <tr><th>Opis:</th><td>${client.description || "Brak"}</td></tr>
-    <tr><th>Data stworzenia:</th><td>${client.date}</td></tr>`;
+    <tr><th>Miasto:</th><td id="clientCity">${client.city || "Brak"}</td></tr>
+    <tr><th>Ulica:</th><td id="clientStreet">${client.street || "Brak"} ${client.street_number || ""}</td></tr>
+    <tr><th>Opis:</th><td id="clientDesc">${client.description || "Brak"}</td></tr>
+    <tr><th>Data stworzenia:</th><td id="id=""clientDate">${client.date}</td></tr>`;
   clientTab.appendChild(table);
 }
 
@@ -192,12 +187,10 @@ async function addItemDialog() {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    console.log(json);
     json.forEach((element) => {
       const item = document.createElement("mdui-list-item");
       let inUse = false;
       if (itemsList.some((el) => el.item.id === element.id)) inUse = true;
-      console.log(inUse);
       item.innerText = element.name;
       allItemsList.push({
         html: item,
@@ -228,9 +221,6 @@ async function addItemDialog() {
       element.html.addEventListener("click", async (e) => {
         searchBar.value = element.item.name;
         selectedItemID = element.item.id;
-        console.log(
-          allItemsList.find((el) => el.item.id === selectedItemID).item.id,
-        );
         dialog.open = false;
         const url = "/api/project/addNewelement";
         try {
@@ -286,12 +276,12 @@ const pendingChanges = new Map();
 let unsavedChanges = false;
 const ucSnakcBar = document.createElement("mdui-snackbar");
 ucSnakcBar.setAttribute("action", "Zapisz");
+
 ucSnakcBar.setAttribute("auto-close-delay", "0");
 ucSnakcBar.setAttribute("close-on-outside-click", "false");
-ucSnakcBar.innerText = "Masz niezapisane zmiany";
+ucSnakcBar.innerText = "Masz niezapisane zmiany w produktach";
 ucSnakcBar.addEventListener("action-click", async () => {
   if (pendingChanges.size > 0) {
-    console.log(pendingChanges);
     ucSnakcBar.open = false;
     await uploadItemChanges();
   }
@@ -317,10 +307,6 @@ async function uploadItemChanges() {
   const items = [];
   pendingChanges.forEach((value, key) => {
     let a = productslist.find((el) => el.id === key);
-    console.log(
-      "a",
-      productslist.find((el) => el.id === key),
-    );
     items.push({
       amount: value,
       projectID: projectID,
@@ -346,7 +332,6 @@ async function reloadProject() {
   document.querySelectorAll(".item-container").forEach((e) => {
     document.querySelector(".projectCards").removeChild(e);
   });
-  console.log(document.querySelector(".pricing-table"));
   document
     .querySelector(".pricingListDisplay")
     .removeChild(document.querySelector(".pricing-table"));
@@ -357,7 +342,6 @@ deletePopup.innerText = "";
 deletePopup.className = "delete-popup";
 const delteSnackbar = document.createElement("mdui-snackbar");
 async function deleteItem(element) {
-  console.log(element);
   deletePopup.innerText =
     'Czy na pewno chcesz usunąć element \"' + element.name + '\"?';
   deletePopup.setAttribute("close-on-overlay-click", "");
@@ -383,7 +367,6 @@ async function deleteItem(element) {
           projectID: projectID,
         }),
       });
-      console.log(response);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
@@ -392,12 +375,25 @@ async function deleteItem(element) {
     }
     await reloadProject();
   });
-  console.log(deletePopup.innerText);
 }
 
 async function editProjectInformation() {
   if ((await checkPermission()) <= 0) return;
-  console.log(client);
+  const table = document
+    .querySelector(`.client-data-table`)
+    .querySelectorAll("td");
+  table.forEach((td) => {
+    const textInput = document.createElement("input");
+    textInput.value = td.innerText;
+    td.innerHTML = "";
+    td.appendChild(textInput);
+    const fabProjectInfo = document.querySelector("#editProjectInformation");
+    fabProjectInfo.setAttribute("icon", "check");
+    textInput.addEventListener("change", (ev) => {
+      console.log(ev.target.value);
+    });
+  });
+  console.log(table);
 }
 async function checkPermission() {
   const url = "/api/projectPermission?projectID=" + projectID;
