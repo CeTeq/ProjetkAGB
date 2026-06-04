@@ -1,0 +1,25 @@
+{
+    "name": "logintest",
+    "version": "1.0.0",
+    "private": true,
+    "description": "",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "better-sqlite3": "^11.10.0",
+        "body-parser": "^2.2.0",
+        "cjs": "^0.0.11",
+        "cors": "^2.8.6",
+        "express": "^4.21.2",
+        "express-session": "^1.18.1"
+    },
+    "overrides": {
+        "tar": "^7.5.11"
+    }
+}
