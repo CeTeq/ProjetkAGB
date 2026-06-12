@@ -16,21 +16,21 @@ const toast = useToast();
 const items = computed(() => [
     {
         label: "Projekty",
-        icon: "i-lucide-user",
+        icon: "material-symbols:work-outline",
         slot: "projects",
     },
     {
         label: "Zarchiwizowane",
-        icon: "/docs/getting-started",
+        icon: "material-symbols:inventory-2-outline",
         slot: "archived",
 
     },
 ]);
 
-const { data, error } = useFetch('http://' + devIP + ':3003/api/getProjects', {
+const { data: projectsData, error, refresh: refreshProjects } = await useFetch('http://' + devIP + ':3003/api/getProjects', {
     method: 'GET',
     headers: {
-        "Content-Type": "applicat   ion/json",
+        "Content-Type": "application/json",
         ...useRequestHeaders(['cookie'])
     },
     server: false,
@@ -45,8 +45,46 @@ watch(error, (newError) => {
     });
 })
 
+const addProjectModalState = ref(false)
 
+async function addProject() {
+    console.log(state.projectName)
+    if (!state.projectName) return;
+    try {
+        const response = await $fetch('http://' + devIP + ':3003/api/createProject', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                ...useRequestHeaders(['cookie'])
+            },
+            body: {
+                projectName: state.projectName
+            },
+            server: false,
+            credentials: 'include'
 
+        })
+        await refreshProjects()
+        addProjectModalState.value = false
+    } catch (error) {
+        toast.add({
+            title: 'Error!',
+            description: ' Nie udało się utworzyć projektu.',
+            color: 'error'
+        })
+    }
+}
+const state = reactive({
+    projectName: undefined
+});
+function validate() {
+    const errors = []
+    if (!state.projectName) errors.push({name: 'projectName', message: 'Required'})
+    return errors
+}
+function isFormValid() {
+    return !state.projectName
+}
 </script>
 
 <template>
@@ -59,10 +97,31 @@ watch(error, (newError) => {
                 class="gap-4 w-full"
             >
                 <template #projects="{ item }" class="cursor-pointer">
-                    <ProjectList :projects="data" :archived="false" :desktop="false"></ProjectList>
+                    <ProjectList :projects="projectsData" :archived="false" :desktop="false" @refresh="refreshProjects">
+                    </ProjectList>
+                    <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0">
+                        <template #content class="flex justify-center">
+                            <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
+                            <UForm :validate="validate" :state="state" @submit.prevent="addProject">
+                                <div class="text-center">
+                                    <UFormField name="projectName" class="pb-3">
+                                        <UInput v-model="state.projectName"></UInput>
+                                    </UFormField>
+                                </div>
+                                <div class="flex justify-center">
+                                    <UButton type="submit" class="w-15 ml-3 mp-3 justify-center" color="success" loading-auto :disabled="isFormValid()">Utwórz</UButton>
+                                </div>
+                            </UForm>
+                        </template>
+                    </UModal>
+                    <div class="fixed  left-[85%] top-[92%] z-100">
+                        <UButton icon="lucide:plus" class="p-4" @click="addProjectModalState = true">
+
+                        </UButton>
+                    </div>
                 </template>
                 <template #archived="{ item }" class="cursor-pointer">
-                    <ProjectList :projects="data" :archived="true" :desktop="false"></ProjectList>
+                    <ProjectList :projects="projectsData" :archived="true" :desktop="false"></ProjectList>
                 </template>
             </UTabs>
         </div>
@@ -75,11 +134,11 @@ watch(error, (newError) => {
             >
 
             <template #projects="{ item }">
-                <ProjectList :projects="data" :archived="false" :desktop="true"></ProjectList>
+                <ProjectList :projects="projectsData" :archived="false" :desktop="true"></ProjectList>
             </template>
 
             <template #archived="{ item }">
-                <ProjectList :projects="data" :archived="true" :desktop="true"></ProjectList>
+                <ProjectList :projects="projectsData" :archived="true" :desktop="true"></ProjectList>
             </template>
 
             </UTabs>
