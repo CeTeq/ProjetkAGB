@@ -284,8 +284,13 @@ app.post("/api/createProject", isAuthenticated, async function (req, res) {
     stmt = db.prepare(
         "INSERT INTO permissions (user_id, permission, project_id) VALUES ((?), (?), (?))",
     );
-    stmt.run(req.session.userID, 7, projectID);
-    res.redirect("/project/index.html?id=" + projectID);
+    try {
+        stmt.run(req.session.userID, 7, projectID);
+        res.sendStatus(200)
+    } catch (error) {
+        res.sendStatus(500)
+    }
+
 });
 app.post(
     "/api/project/setPricingList",

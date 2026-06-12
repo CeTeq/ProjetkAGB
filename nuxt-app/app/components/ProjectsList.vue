@@ -2,15 +2,39 @@
 import { ref, computed, watch } from 'vue'
 const props = defineProps(['projects', 'archived', 'desktop'])
 const devIP = import.meta.env.VITE_DEV_IP
-
+const toast = useToast();
 const { data, error } = useFetch('http://' + devIP + ':3003/api/me', {
     method: 'GET',
     server: false,
     credentials: 'include'
 });
+
+const projects = ref()
+updateProjects()
+
+async function updateProjects() {
+    try {
+        const response = await $fetch('http://' + devIP + ':3003/api/getProjects', {
+            method: 'GET',
+            headers: {
+                "Content-Type": "applicat   ion/json",
+                ...useRequestHeaders(['cookie'])
+            },
+            server: false,
+            credentials: 'include'
+        });
+        projects.value = response
+    } catch (error) {
+        toast.add({
+            title: 'Bład!',
+            description: 'Nie udało się zaktualizować projektów.',
+            color: 'danger',
+        })
+    }
+}
 const formattedProjects = computed(() => {
-    if(!props.projects) return
-    return props.projects
+    if (!projects.value) return []
+    return projects.value
         .filter(e => {
             if (props.archived === true) {
                 return e.archived === 2
@@ -30,36 +54,103 @@ watch(error, (newError) => {
     console.log(newError)
 })
 
-function archiveProject(projectID, action) {
-    const { data, error } = useFetch('http://' + devIP + ':3003/api/project/archive', {
-        method: 'POST',
-        server: false,
-        credentials: 'include',
-        body: {
-            projectID: projectID,
-            archived: action ? 1 : 2
-        }
-    })
-}
+async function archiveProject(projectID, action) {
+    try {
+        await $fetch('http://' + devIP + ':3003/api/project/archive', {
+            method: 'POST',
+            server: false,
+            credentials: 'include',
+            body: {
+                projectID: projectID,
+                archived: action ? 2 : 1
+            }
+        })
+        await new Promise(resolve => setTimeout(resolve, 200))
 
+        toast.add({
+            title: 'Sukces!',
+            description: action ? 'Zarchiwizowano projekt.' : 'Przywrócono projekt.',
+            color: 'success'
+        })
+        confirmModalState.value = false
+        await updateProjects()
+    } catch {
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        toast.add({
+            title: 'Błąd!',
+            description: action ? 'Nie udało się zarchiwizować projektu.' : 'Nie udało się przywrócić projektu.',
+            color: 'error'
+        })
+        confirmModalState.value = false
+    }
+}
+async function deleteProject(projectID) {
+    try {
+        await $fetch('http://' + devIP + ':3003/api/project/delete', {
+            method: 'POST',
+            server: false,
+            credentials: 'include',
+            body: {
+                projectID: projectID
+            }
+        })
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        toast.add({
+            title: 'Sukces!',
+            description: 'Usunięto projekt!',
+            color: 'success'
+        })
+        confirmModalState.value = false
+        await updateProjects()
+    } catch {
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        toast.add({
+            title: 'Błąd!',
+            description: 'Nie udało się usunąć projektu.',
+            color: 'error'
+        })
+        confirmModalState.value = false
+    }
+}
+async function addProject() {
+    setTimeout(()=> {
+        console.log('test')
+    }, 1000)
+}
+const addProjectModalState = ref(false)
+const confirmModalState = ref(false)
+let confirmoModalTitle = null
+let tempModalProjectID = null
+
+async function confirmModalDelete(title, projectID) {
+    confirmModalState.value = true
+    confirmoModalTitle = title
+    tempModalProjectID = projectID
+}
+function closeConfirmModal() {
+    confirmModalState.value = false
+}
 
 const dropdownItems = (item) => {
     return props.archived
         ? [
             {
                 label: 'Przywróć',
-                icon: 'lucide:archive-restore',
+                icon: 'material-symbols:unarchive-outline',
                 color: 'success',
                 onSelect() {
-                    console.log('Przywróć projekt: ', item.projectID)
+                    archiveProject(item.projectID, false)
                 }
             },
             {
                 label: 'Usuń',
-                icon: 'lucide:trash-2',
+                icon: 'material-symbols:delete-outline',
                 color: 'error',
                 onSelect() {
-                    console.log('Usuń projekt: ', item.projectID)
+                    confirmModalDelete(item.title, item.projectID)
                 }
 
             }
@@ -67,28 +158,33 @@ const dropdownItems = (item) => {
         :[
             {
                 label: 'Archiwizuj',
-                icon: 'lucide:archive',
+                icon: 'material-symbols:archive-outline',
                 onSelect() {
-                    console.log('Zarchiwizuj' +
-                        ' projekt: ', item.projectID)
+                    archiveProject(item.projectID, true)
                 }
             },
             {
                 label: 'Usuń',
-                icon: 'lucide:trash-2',
+                icon: 'material-symbols:delete-outline',
                 color: 'error',
                 onSelect() {
-                    console.log('Usuń projekt: ', item.projectID)
+                    confirmModalDelete(item.title, item.projectID)
                 }
             }
         ]
 }
-
+const state = reactive({
+    projectName: undefined
+});
+function validate() {
+    const errors = []
+    if (!state.projectName) errors.push({name: 'projectName', message: 'Required'})
+    return errors
+}
 
 const lanes = ref(3)
 const gap = ref(16)
 const estimateSize = () => 120
-
 </script>
 
 <template>
@@ -109,6 +205,30 @@ const estimateSize = () => 120
                 </UDropdownMenu>
             </UPageCard>
         </UScrollArea>
+        <UModal color="neutral" variant="subtle" v-model:open="confirmModalState" class="p-4 w-[80%]">
+            <template #content class="flex justify-center">
+                <div class="mb-5 justify-center pb-2">Czy na pewno chcesz usunąć projekt o nazwie: "{{confirmoModalTitle}}"</div>
+                <div class="flex justify-center">
+                    <UButton class="w-15 ml-3 mp-3 justify-center" color="error" @click="deleteProject(tempModalProjectID)" loading-auto :dismissible="false" non-dismissible>Tak</UButton><UButton class="w-15 ml-3 mp-3 justify-center" color="success" @click="closeConfirmModal()">Nie</UButton>
+                </div>
+            </template>
+        </UModal>
+        <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0" @submit.prevent="addProject">
+            <template #content class="flex justify-center">
+                <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
+                <UForm :validate="validate" :state="state">
+                    <div class="text-center">
+                        <UFormField name="projectName">
+                            <UInput v-model="state.projectName" class="pb-3"></UInput>
+                        </UFormField>
+                    </div>
+                    <div class="flex justify-center">
+                        <UButton type="submit" class="w-15 ml-3 mp-3 justify-center" color="success" @click="addProject()" loading-auto>Utwórz</UButton>
+                    </div>
+                </UForm>
+            </template>
+        </UModal>
+
     </div>
 
     <div v-else>
