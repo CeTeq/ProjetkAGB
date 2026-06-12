@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 const props = defineProps(['projects', 'archived', 'desktop'])
+const emit = defineEmits(['refresh'])
 const devIP = import.meta.env.VITE_DEV_IP
 const toast = useToast();
 const { data, error } = useFetch('http://' + devIP + ':3003/api/me', {
@@ -9,32 +10,11 @@ const { data, error } = useFetch('http://' + devIP + ':3003/api/me', {
     credentials: 'include'
 });
 
-const projects = ref()
-updateProjects()
 
-async function updateProjects() {
-    try {
-        const response = await $fetch('http://' + devIP + ':3003/api/getProjects', {
-            method: 'GET',
-            headers: {
-                "Content-Type": "applicat   ion/json",
-                ...useRequestHeaders(['cookie'])
-            },
-            server: false,
-            credentials: 'include'
-        });
-        projects.value = response
-    } catch (error) {
-        toast.add({
-            title: 'Bład!',
-            description: 'Nie udało się zaktualizować projektów.',
-            color: 'danger',
-        })
-    }
-}
+
 const formattedProjects = computed(() => {
-    if (!projects.value) return []
-    return projects.value
+    if (!props.projects) return []
+    return props.projects
         .filter(e => {
             if (props.archived === true) {
                 return e.archived === 2
@@ -65,17 +45,16 @@ async function archiveProject(projectID, action) {
                 archived: action ? 2 : 1
             }
         })
-        await new Promise(resolve => setTimeout(resolve, 200))
 
+        await emit('refresh')
+        console.log('refresh')
         toast.add({
             title: 'Sukces!',
             description: action ? 'Zarchiwizowano projekt.' : 'Przywrócono projekt.',
             color: 'success'
         })
         confirmModalState.value = false
-        await updateProjects()
     } catch {
-        await new Promise(resolve => setTimeout(resolve, 200))
 
         toast.add({
             title: 'Błąd!',
@@ -87,7 +66,7 @@ async function archiveProject(projectID, action) {
 }
 async function deleteProject(projectID) {
     try {
-        await $fetch('http://' + devIP + ':3003/api/project/delete', {
+        await $fetch('http://' + devIP + ':3003/api/deleteProject', {
             method: 'POST',
             server: false,
             credentials: 'include',
@@ -103,7 +82,7 @@ async function deleteProject(projectID) {
             color: 'success'
         })
         confirmModalState.value = false
-        await updateProjects()
+        await emit('refresh')
     } catch {
         await new Promise(resolve => setTimeout(resolve, 200))
 
@@ -114,11 +93,6 @@ async function deleteProject(projectID) {
         })
         confirmModalState.value = false
     }
-}
-async function addProject() {
-    setTimeout(()=> {
-        console.log('test')
-    }, 1000)
 }
 const addProjectModalState = ref(false)
 const confirmModalState = ref(false)
@@ -215,7 +189,7 @@ const estimateSize = () => 120
         </UModal>
         <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0" @submit.prevent="addProject">
             <template #content class="flex justify-center">
-                <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
+                <div class="pb-3 justify-center w-full text-center">Podaj nazwę nowego projektu:</div>
                 <UForm :validate="validate" :state="state">
                     <div class="text-center">
                         <UFormField name="projectName">

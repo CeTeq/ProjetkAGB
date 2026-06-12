@@ -57,29 +57,28 @@ function isAuthenticated(req, res, next) {
         next("route");
     }
 }
+
 function isAuthorized(req, requiredPermissions) {
     let stmt = db.prepare("SELECT type FROM users WHERE id==(?)");
     const userType = stmt.get(req.session.userID);
+
     console.log("User type: ", userType);
     console.log(req.session, "req.session");
+
     if (userType.type === "admin") return true;
-    if (!requiredPermissions.isInteger && requiredPermissions !== "admin")
-        return false;
-    else if (!requiredPermissions.isInteger && requiredPermissions === "admin")
-        return true;
-    else if (userType.type !== "admin") {
-        console.log(requiredPermissions);
-        stmt = db.prepare(
-            "SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);",
-        );
-        const perm = stmt.run(
-            req.session.userID,
-            req.body.projectID,
-        ).permission;
-        if (!perm || perm === 0) return false;
-        else if (perm < requiredPermissions) return false;
-        else return true;
-    } else return true;
+
+    if (requiredPermissions === "admin") return false;
+
+    const projectID = req.body.projectID
+    if (!projectID) return false
+
+    const permStmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);")
+    const permRecord = permStmt.get(req.session.userID, projectID)
+
+    if(!permRecord || !permRecord.permission) return false
+
+    return permRecord.permission >= requiredPermissions
+
 }
 function permissionsLevel(req) {
     let stmt = db.prepare("SELECT type FROM users WHERE id==(?)");
@@ -292,6 +291,29 @@ app.post("/api/createProject", isAuthenticated, async function (req, res) {
     }
 
 });
+
+    const removeProject = db.prepare("DELETE FROM Project WHERE id = (?)")
+    const removeItems = db.prepare("DELETE FROM project_products WHERE project_id = (?)")
+    const removeOrder = db.prepare("DELETE FROM `order` WHERE project_id = (?)")
+    const removePermissions = db.prepare("DELETE FROM permissions WHERE project_id = (?)")
+
+    const deleteProject = db.transaction((projectID) => {
+        removeProject.run(projectID)
+        removeItems.run(projectID)
+        removeOrder.run(projectID)
+        removePermissions.run(projectID)
+    })
+
+    app.post("/api/deleteProject", isAuthenticated, async (req, res) => {
+        if (!req.body || !req.body.projectID) return res.sendStatus(400)
+        if (!isAuthorized(req, "admin")) return res.sendStatus(401)
+        try {
+            deleteProject(req.body.projectID)
+            res.sendStatus(200)
+        } catch (error) {
+            res.sendStatus(500)
+        }
+    })
 app.post(
     "/api/project/setPricingList",
     isAuthenticated,

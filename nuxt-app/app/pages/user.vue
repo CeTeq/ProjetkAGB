@@ -1,6 +1,6 @@
 <script setup>
-import { useNuxtApp } from "#app";
-import ProjectList from "~/components/ProjectsList.vue"
+
+import {navigateTo} from "#app";
 
 const nuxtApp = useNuxtApp()
 const $viewport = nuxtApp.$viewport
@@ -48,7 +48,6 @@ watch(error, (newError) => {
 const addProjectModalState = ref(false)
 
 async function addProject() {
-    console.log(state.projectName)
     if (!state.projectName) return;
     try {
         const response = await $fetch('http://' + devIP + ':3003/api/createProject', {
@@ -66,7 +65,15 @@ async function addProject() {
         })
         await refreshProjects()
         addProjectModalState.value = false
+        toast.add({
+            title: 'Sukces!',
+            description: "Pomyślnie utworzono projekt",
+            color: 'success'
+        })
+        navigateTo('/project/' + projectsData.value[projectsData.value.length - 1].id)
+
     } catch (error) {
+        console.log(error)
         toast.add({
             title: 'Error!',
             description: ' Nie udało się utworzyć projektu.',
@@ -97,8 +104,8 @@ function isFormValid() {
                 class="gap-4 w-full"
             >
                 <template #projects="{ item }" class="cursor-pointer">
-                    <ProjectList :projects="projectsData" :archived="false" :desktop="false" @refresh="refreshProjects">
-                    </ProjectList>
+                    <ProjectsList :projects="projectsData" :archived="false" :desktop="false" @refresh="refreshProjects">
+                    </ProjectsList>
                     <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0">
                         <template #content class="flex justify-center">
                             <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
@@ -121,7 +128,7 @@ function isFormValid() {
                     </div>
                 </template>
                 <template #archived="{ item }" class="cursor-pointer">
-                    <ProjectList :projects="projectsData" :archived="true" :desktop="false"></ProjectList>
+                    <ProjectsList :projects="projectsData" :archived="true" :desktop="false" @refresh="refreshProjects"></ProjectsList>
                 </template>
             </UTabs>
         </div>
@@ -134,14 +141,17 @@ function isFormValid() {
             >
 
             <template #projects="{ item }">
-                <ProjectList :projects="projectsData" :archived="false" :desktop="true"></ProjectList>
+                <ProjectsList :projects="projectsData" :archived="false" :desktop="true" @refresh="refreshProjects"></ProjectsList>
             </template>
 
             <template #archived="{ item }">
-                <ProjectList :projects="projectsData" :archived="true" :desktop="true"></ProjectList>
+                <ProjectsList :projects="projectsData" :archived="true" :desktop="true" @refresh="refreshProjects"></ProjectsList>
             </template>
 
             </UTabs>
         </div>
+        <UFooter>
+
+        </UFooter>
     </UApp>
 </template>
