@@ -25,7 +25,7 @@ const formattedProjects = computed(() => {
             id: index + 1,
             title: e.name,
             description: e.description || 'No description.',
-            to: 'project/' + e.id,
+            to: '/project/' + e.id,
             projectID: e.id
         }))
 })
@@ -94,7 +94,6 @@ async function deleteProject(projectID) {
         confirmModalState.value = false
     }
 }
-const addProjectModalState = ref(false)
 const confirmModalState = ref(false)
 let confirmoModalTitle = null
 let tempModalProjectID = null
@@ -187,22 +186,6 @@ const estimateSize = () => 120
                 </div>
             </template>
         </UModal>
-        <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0" @submit.prevent="addProject">
-            <template #content class="flex justify-center">
-                <div class="pb-3 justify-center w-full text-center">Podaj nazwę nowego projektu:</div>
-                <UForm :validate="validate" :state="state">
-                    <div class="text-center">
-                        <UFormField name="projectName">
-                            <UInput v-model="state.projectName" class="pb-3"></UInput>
-                        </UFormField>
-                    </div>
-                    <div class="flex justify-center">
-                        <UButton type="submit" class="w-15 ml-3 mp-3 justify-center" color="success" @click="addProject()" loading-auto>Utwórz</UButton>
-                    </div>
-                </UForm>
-            </template>
-        </UModal>
-
     </div>
 
     <div v-else>

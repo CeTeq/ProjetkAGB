@@ -70,7 +70,7 @@ async function addProject() {
             description: "Pomyślnie utworzono projekt",
             color: 'success'
         })
-        navigateTo('/project/' + projectsData.value[projectsData.value.length - 1].id)
+        navigateTo(`/project/${projectsData.value[projectsData.value.length - 1].id}`)
 
     } catch (error) {
         console.log(error)
@@ -116,7 +116,7 @@ function isFormValid() {
                                     </UFormField>
                                 </div>
                                 <div class="flex justify-center">
-                                    <UButton type="submit" class="w-15 ml-3 mp-3 justify-center" color="success" loading-auto :disabled="isFormValid()">Utwórz</UButton>
+                                    <UButton type="submit" class="w-15 ml-0 mp-3 justify-center" color="success" loading-auto :disabled="isFormValid()">Utwórz</UButton>
                                 </div>
                             </UForm>
                         </template>
