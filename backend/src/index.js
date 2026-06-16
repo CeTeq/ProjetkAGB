@@ -336,6 +336,7 @@ app.post("/api/project/deleteItem", isAuthenticated, async function (req, res) {
     if (!req.body.projectID || !req.body.productID) return;
     const stmt = db.prepare(
         "DELETE from `project_products` WHERE project_id = (?) AND product_id = (?)",
+        //Możliwe że powinienem usówać rekord nie po ip projektu i przedmiotu ale poo id project_products
     );
     stmt.run(req.body.projectID, req.body.productID);
     res.sendStatus(200);
