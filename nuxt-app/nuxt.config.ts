@@ -13,11 +13,5 @@ export default defineNuxtConfig({
     css: ["~/assets/css/main.css"],
     vite: {
         plugins: [tailwindcss()],
-    },
-    icon: {
-        // Force Nuxt to pre-fetch and include these icons globally
-        serverBundle: {
-            collections: ['lucide']
-        }
     }
 });
