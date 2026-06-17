@@ -73,11 +73,14 @@ function isAuthorized(req, requiredPermissions) {
     if (!projectID) return false
 
     const permStmt = db.prepare("SELECT permission FROM `permissions` WHERE user_id = (?) AND project_id = (?);")
-    const permRecord = permStmt.get(req.session.userID, projectID)
+    try {
+        const permRecord = permStmt.get(req.session.userID, projectID)
+        if(!permRecord || !permRecord.permission) return false
+        return permRecord.permission >= requiredPermissions
+    } catch (error) {
+        if(!permRecord || !permRecord.permission) return false
+    }
 
-    if(!permRecord || !permRecord.permission) return false
-
-    return permRecord.permission >= requiredPermissions
 
 }
 function permissionsLevel(req) {
@@ -216,30 +219,34 @@ app.get("/api/project", isAuthenticated, async function (req, res) {
     const permissions = permissionsLevel(req);
     //Przeonoszenie na stronę projektu linkiem
     console.log("Permissions: ", permissions);
-    if (perms.permission !== 0) {
-        let stmt = db.prepare("select * from Project where id = (?)");
-        const project = stmt.get(req.query.id);
-        stmt = db.prepare(
-            "select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_id = products.id join `Project` on project_products.project_id = project.id join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)",
-        );
+    if (perms?.permission !== 0) {
         try {
-            const items = stmt.all(req.query.id, project.shrack_pricing_list_id);
-            console.log(items);
-            stmt = db.prepare("SELECT * FROM `order` where project_id=(?)");
-            const order = stmt.get(project.id);
-            console.log("items: ", items);
-            if (perms.permission > 0) {
-                res.json({
-                    id: project.id,
-                    name: project.name,
-                    client: order,
-                    items: items,
-                });
+            let stmt = db.prepare("select * from Project where id = (?)");
+            const project = stmt.get(req.query.id);
+            stmt = db.prepare(
+                "select products.id, products.name, products.mark, product_prices.price, product_prices.currency, project_products.number from `products` inner join project_products on project_products.product_id = products.id join `Project` on project_products.project_id = project.id join `product_prices` on products.id = product_prices.product_id  where project.id = (?) and product_prices.pricing_list_id = (?)",
+            );
+            try {
+                const items = stmt.all(req.query.id, project.shrack_pricing_list_id);
+                console.log(items);
+                stmt = db.prepare("SELECT * FROM `order` where project_id=(?)");
+                const order = stmt.get(project.id);
+                console.log("items: ", items);
+                if (perms.permission > 0) {
+                    res.json({
+                        id: project.id,
+                        name: project.name,
+                        client: order,
+                        items: items,
+                    });
+                }
+            } catch (error) {
+                return res.redirect("/?err=noPermissions");
             }
         } catch (error) {
-            return res.redirect("/?err=noPermissions");
+            return res.sendStatus(401);
         }
-    } else return res.redirect("/?err=noPermissions");
+    } else return res.sendStatus(401)
 });
 app.post("/api/project/archive", isAuthenticated, async function (req, res) {
     if (!req.body || !req.body.projectID || !req.body.archived)

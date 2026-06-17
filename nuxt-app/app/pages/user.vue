@@ -5,6 +5,7 @@ import {navigateTo} from "#app";
 const nuxtApp = useNuxtApp()
 const $viewport = nuxtApp.$viewport
 const devIP = import.meta.env.VITE_DEV_IP
+const activeDesktopTab = ref("projects")
 
 watch($viewport.breakpoint, function (newBreakpoint, oldBreakpoint) {
     console.log('Breakpoint updated:', oldBreakpoint, '->', newBreakpoint)
@@ -106,23 +107,8 @@ function isFormValid() {
                 <template #projects="{ item }" class="cursor-pointer">
                     <ProjectsList :projects="projectsData" :archived="false" :desktop="false" @refresh="refreshProjects">
                     </ProjectsList>
-                    <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0">
-                        <template #content class="flex justify-center">
-                            <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
-                            <UForm :validate="validate" :state="state" @submit.prevent="addProject">
-                                <div class="text-center">
-                                    <UFormField name="projectName" class="pb-3">
-                                        <UInput v-model="state.projectName"></UInput>
-                                    </UFormField>
-                                </div>
-                                <div class="flex justify-center">
-                                    <UButton type="submit" class="w-15 ml-0 mp-3 justify-center" color="success" loading-auto :disabled="isFormValid()">Utwórz</UButton>
-                                </div>
-                            </UForm>
-                        </template>
-                    </UModal>
                     <div class="fixed  left-[85%] top-[92%] z-100">
-                        <UButton icon="lucide:plus" class="p-4" @click="addProjectModalState = true">
+                        <UButton icon="lucide:plus" class="p-4 md:hidden" @click="addProjectModalState = true">
 
                         </UButton>
                     </div>
@@ -132,24 +118,66 @@ function isFormValid() {
                 </template>
             </UTabs>
         </div>
-        <div v-else>
-            <UTabs
-                :items="items"
-                variant="link"
-                class="w-full"
-                :ui="{ list: 'justify-start pl-30' }"
-            >
+        <div v-else class="fixed inset-0 flex flex-col overflow-hidden">
+            <header class="flex items-center gap-4 px-6 py-4 border-b border-default shrink-0 bg-background">
+                <div class="flex-1">
+                    <h1 class="text-lg font-semibold">
+                        {{ items.find(i => i.slot === activeDesktopTab)?.label }}
+                    </h1>
+                    <p class="text-xs text-muted mt-0.5">
+                        {{ projectsData?.filter(p => activeDesktopTab === 'projects' ? p.archived === 1 : p.archived === 2).length }} projektów
+                    </p>
+                </div>
+                <UButton
+                    v-if="activeDesktopTab === 'projects'"
+                    icon="lucide:plus"
+                    size="sm"
+                    @click="addProjectModalState = true"
+                >
+                    Nowy projekt
+                </UButton>
+            </header>
 
-            <template #projects="{ item }">
-                <ProjectsList :projects="projectsData" :archived="false" :desktop="true" @refresh="refreshProjects"></ProjectsList>
-            </template>
+            <nav class="flex gap-1 px-6 py-2 border-b border-default shrink-0 bg-background">
+                <button
+                    v-for="tab in items"
+                    :key="tab.slot"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    :class="activeDesktopTab === tab.slot
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted hover:bg-elevated hover:text-default'"
+                    @click="activeDesktopTab = tab.slot"
+                >
+                    <UIcon :name="tab.icon" class="w-4 h-4 shrink-0" />
+                    {{ tab.label }}
+                </button>
+            </nav>
 
-            <template #archived="{ item }">
-                <ProjectsList :projects="projectsData" :archived="true" :desktop="true" @refresh="refreshProjects"></ProjectsList>
-            </template>
-
-            </UTabs>
+            <div class="flex-1 overflow-y-auto px-6 py-6">
+                <ProjectsList
+                    :projects="projectsData"
+                    :archived="activeDesktopTab === 'archived'"
+                    :desktop="true"
+                    @refresh="refreshProjects"
+                />
+            </div>
         </div>
+
+        <UModal color="neutral" variant="subtle" v-model:open="addProjectModalState" class="p-4 w-[60%] divide-y-0">
+            <template #content class="flex justify-center">
+                <div class="pb-3 justify-center pb-2 w-full text-center">Podaj nazwę nowego projektu:</div>
+                <UForm :validate="validate" :state="state" @submit.prevent="addProject">
+                    <div class="text-center">
+                        <UFormField name="projectName" class="pb-3">
+                            <UInput v-model="state.projectName"></UInput>
+                        </UFormField>
+                    </div>
+                    <div class="flex justify-center">
+                        <UButton type="submit" class="w-15 ml-0 mp-3 justify-center" color="success" loading-auto :disabled="isFormValid()">Utwórz</UButton>
+                    </div>
+                </UForm>
+            </template>
+        </UModal>
         <UFooter>
 
         </UFooter>

@@ -178,7 +178,7 @@ const estimateSize = () => 120
                 </UDropdownMenu>
             </UPageCard>
         </UScrollArea>
-        <UModal color="neutral" variant="subtle" v-model:open="confirmModalState" class="p-4 w-[80%]">
+        <UModal color="neutral" variant="subtle" v-model:open="confirmModalState" class="p-4 w-[80%] divide-y-0">
             <template #content class="flex justify-center">
                 <div class="mb-5 justify-center pb-2">Czy na pewno chcesz usunąć projekt o nazwie: "{{confirmoModalTitle}}"</div>
                 <div class="flex justify-center">
@@ -188,23 +188,44 @@ const estimateSize = () => 120
         </UModal>
     </div>
 
-    <div v-else>
-    <UScrollArea  class="h-max w-full p-3 pl-30 pr-30" :ui="{ viewport: 'gap-4 p-4' }"
-        v-slot="{ item, index }"
-        :items="formattedProjects"
-        :orientation="orientation"
-        :virtualize="{
-            gap,
-            lanes,
-            estimateSize
-        }"
-    >
-        <UPageCard
-            v-bind="item"
-            variant="soft"
-            class="rounded-2xl min-h-30"
+    <div v-else class="h-full">
+        <div
+            v-if="formattedProjects.length === 0"
+            class="flex flex-col items-center justify-center h-64 gap-3 text-muted"
+        >
+            <UIcon name="material-symbols:work-outline" class="w-12 h-12 opacity-30" />
+            <p class="text-sm">Brak projektów.</p>
+        </div>
 
-        />
-    </UScrollArea>
+        <div
+            v-else
+            class="grid gap-4"
+            style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"
+        >
+            <UPageCard
+                v-for="item in formattedProjects"
+                :key="item.projectID"
+                v-bind="item"
+                variant="soft"
+                class="rounded-2xl min-h-30 relative"
+            >
+                <UDropdownMenu :items="dropdownItems(item)" class="flex absolute right-2 top-3">
+                    <UButton icon="lucide:more-vertical" color="neutral" variant="ghost" class="w-fit ml-auto z-10 hover:bg-[#FFFFFF1F]"/>
+                </UDropdownMenu>
+            </UPageCard>
+        </div>
+
+        <UModal color="neutral" variant="subtle" v-model:open="confirmModalState" class="p-4 w-[80%] divide-y-0">
+            <template #content>
+                <div class="mb-5 text-center">
+                    Czy na pewno chcesz usunąć projekt o nazwie:<br />
+                    <span class="font-semibold">"{{ confirmoModalTitle }}"</span>?
+                </div>
+                <div class="flex justify-center gap-3">
+                    <UButton color="error" @click="deleteProject(tempModalProjectID)" loading-auto :dismissible="false">Usuń</UButton>
+                    <UButton color="neutral" variant="outline" @click="closeConfirmModal()">Anuluj</UButton>
+                </div>
+            </template>
+        </UModal>
     </div>
 </template>
