@@ -8,7 +8,7 @@
     const devIP = import.meta.env.VITE_DEV_IP
 
     const toast = useToast()
-
+    const VAT = 23
     watch(viewport.breakpoint, function (newBreakpoint, oldBreakpoint) {
         console.log('Breakpoint updated:', oldBreakpoint, '->', newBreakpoint)
     })
@@ -64,7 +64,56 @@
         })
         return items
     })
+    const columns = [
+        {
+            accessorKey: 'name',
+            header: 'Nazwa',
+        },
+        {
+            accessorKey: 'amount',
+            header: 'Ilość',
+        },
+        {
+            accessorKey: 'price',
+            header: 'Cena jedn.',
+        },
+        {
+            accessorKey: 'total',
+            header: 'Razem',
+        },
+    ]
+    const pricingListData = computed(() => {
+        if (!projectItems?.value) return []
+        const items = []
+        let summedPrice = 0
+        projectItems.value.forEach((e) => {
+            const lineTotal = e.amount * e.price
+            items.push({
+                id: e.value,
+                name: e.label,
+                price: `${e.price} ${e.currency}`,
+                amount: e.amount,
+                total: `${lineTotal} ${e.currency}`,
+                _rawTotal: lineTotal
+            })
+            summedPrice += lineTotal
+        })
 
+        const vatAmount = summedPrice * (VAT / 100)
+        const grandTotal = summedPrice + vatAmount
+
+        items.push({
+            id: 'total',
+            name: `Suma z VAT ${VAT}%`,
+            price: null,
+            amount: null,
+            total: `${grandTotal.toFixed(2)} EUR`,
+            _rawTotal: grandTotal
+        })
+        console.log(summedPrice)
+        return items
+    })
+    console.log('ghosndgdls: ', pricingListData.value)
     watch(errorAllItems, (newError) => {
         toast.add({
             title: "Error",
@@ -211,9 +260,9 @@
                                 </template>
                             </UListbox>
                         </template>
-                        <template #pricingList>
-
-                            <UTable :data="projectItems" :columns="columns" class="flex-1" />
+                        <template #pricinglist>
+                            <UTable :data="pricingListData" :columns="columns" class="flex-1">
+                            </UTable>
                         </template>
                     </UTabs>
                 </div>
@@ -315,11 +364,19 @@
                                 </tbody>
                             </table>
                         </template>
-
                         <template v-else-if="activeDesktopTab === 'pricinglist'">
-                            <div class="flex flex-col items-center justify-center h-full gap-3 text-muted">
-                                <UIcon name="material-symbols:price-change-outline-rounded" class="w-12 h-12 opacity-30" />
-                                <p class="text-sm">Cennik – wkrótce dostępny.</p>
+                            <div class="flex-1 overflow-y-auto">
+                                <UTable
+                                    :data="pricingListData"
+                                    :columns="columns"
+                                    class="w-full"
+                                    :ui="{
+                thead: 'sticky top-0 bg-background z-10',
+                th: 'px-6 py-3 text-xs font-semibold uppercase tracking-wide text-muted',
+                td: 'px-6 py-4',
+                tr: 'border-b border-default hover:bg-elevated transition-colors',
+            }"
+                                />
                             </div>
                         </template>
 
@@ -367,6 +424,9 @@
                 </template>
             </UModal>
         </ClientOnly>
+    <div class="hidden print:block">
+        <PricingList :products="projectItems"></PricingList>
+    </div>
     <UFooter class="print:hidden">
 
     </UFooter>
