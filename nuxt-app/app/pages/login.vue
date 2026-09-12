@@ -3,7 +3,7 @@ import { reactive } from "vue";
 import { navigateTo } from "#app";
 
 const toast = useToast();
-const devIP = import.meta.env.VITE_DEV_IP
+const devIP = import.meta.env.VITE_DEV_IP;
 async function onSubmit(event) {
     console.log(event.data.user);
 
@@ -14,7 +14,7 @@ async function onSubmit(event) {
                 user: event.data.user,
                 pass: event.data.pass,
             },
-            credentials: "include"
+            credentials: "include",
         });
         await navigateTo("/user");
     } catch (error) {

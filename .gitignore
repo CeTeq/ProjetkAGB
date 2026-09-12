@@ -1,3 +1,9 @@
 node_modules
 package-lock.json
 .idea
+backend/src/users.db
+backend/src/users.db
+backend/src/users.db
+backend/src/usersbroken.db
+backend/src/users.db
+backend/src/users.db

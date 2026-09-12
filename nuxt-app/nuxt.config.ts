@@ -7,11 +7,11 @@ export default defineNuxtConfig({
     components: [
         {
             path: "~/components",
-            pathPrefix: false
-        }
+            pathPrefix: false,
+        },
     ],
     css: ["~/assets/css/main.css"],
     vite: {
         plugins: [tailwindcss()],
-    }
+    },
 });
