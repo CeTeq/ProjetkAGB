@@ -1,5 +1,5 @@
 <script setup>
-navigateTo('/login')
+navigateTo("/login");
 </script>
 <template>
     <UApp>
