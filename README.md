@@ -40,7 +40,6 @@
 | **Projects** | Create, view, archive, and delete projects with linked products |
 | **Products** | Add / remove / update product quantities within a project |
 | **Pricing Lists** | Manage multiple pricing lists with per-product prices & currencies |
-
 | **Responsive UI** | Mobile & desktop layouts via `nuxt-viewport` and Tailwind CSS |
 
 ---
