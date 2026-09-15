@@ -160,6 +160,15 @@ npm run dev
 
 Open your browser at **`http://localhost:3000`** — you will be redirected to the login page.
 
+### Default Users
+
+| Username | Password | Role |
+| --- | --- | --- |
+| `admin` | `admin` | Administrator |
+| `user` | `user` | Regular user |
+
+> ⚠️ **Change these credentials before deploying to production.**
+
 ---
 
 ## API Endpoints
