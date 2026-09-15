@@ -3,7 +3,6 @@ const props = defineProps(["products"]);
 
 let productslist = [];
 
-console.log("Props products: ", props.products);
 async function displayPricinglist(products) {
     if (!products) return;
     const table = document.createElement("table");

@@ -6,14 +6,6 @@ import { getUserData, isPasswordCorrect } from "../utils/helpers.js";
 
 const router = Router();
 
-router.get("/", isAuthenticated, function (req, res) {
-    res.redirect("/user.html?username=" + req.session.user);
-});
-
-router.get("/", function (req, res) {
-    res.redirect("/login.html");
-});
-
 router.post("/api/login", async function (req, res, next) {
     if (!req.body.user || !req.body.pass)
         return res.status(400).json({ error: "Invalid username or password" });
