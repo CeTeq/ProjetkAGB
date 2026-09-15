@@ -31,6 +31,7 @@ const {
 watch(projectData, (d) => {
     console.log("projectData: ", d);
 });
+//Project Data Tab section
 //Czemu to jest zdublowane???
 const projectDataComputed = computed(() => {
     if (!projectData.value?.client) return {};
@@ -560,7 +561,40 @@ const activeDesktopTab = ref("items");
                                     td: 'px-6 py-4',
                                     tr: 'border-b border-default hover:bg-elevated transition-colors',
                                 }"
-                            />
+                            >
+                                <template #value-data="{ row }">
+                                    <div
+                                        v-if="editingRowLabel !== row.label"
+                                        class="cursor-pointer hover:text-primary transition-colors"
+                                        @click="startEditingCell(row.label)"
+                                    >
+                                        {{ row.value || "—" }}
+                                    </div>
+                                    <div v-else class="flex gap-2 items-center">
+                                        <UInput
+                                            v-model="editingValue"
+                                            size="sm"
+                                            autofocus
+                                            @keyup.enter="saveCell(row.label)"
+                                            @keyup.escape="cancelEdit"
+                                        />
+                                        <UButton
+                                            icon="lucide:check"
+                                            color="success"
+                                            variant="ghost"
+                                            size="xs"
+                                            @click="saveCell(row.label)"
+                                        />
+                                        <UButton
+                                            icon="lucide:x"
+                                            color="error"
+                                            variant="ghost"
+                                            size="xs"
+                                            @click="cancelEdit"
+                                        />
+                                    </div>
+                                </template>
+                            </UTable>
                         </div>
                     </template>
                 </div>
