@@ -9,7 +9,6 @@ import authRoutes from "./routes/auth.js";
 import projectRoutes from "./routes/projects.js";
 import productRoutes from "./routes/products.js";
 import pricingListRoutes from "./routes/pricingList.js";
-import magazynRoutes from "./routes/magazyn.js";
 
 const app = express();
 const port = 3003;
@@ -39,7 +38,6 @@ app.use(authRoutes);
 app.use(projectRoutes);
 app.use(productRoutes);
 app.use(pricingListRoutes);
-app.use(magazynRoutes);
 
 app.listen(port, process.env.DEV_IP, () => {
     console.log(`Server running on http://localhost:${port}`);
