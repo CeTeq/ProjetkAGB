@@ -87,6 +87,11 @@ function editClientRowData(row) {
     console.log('Edited row: ', row)
     editedClientRow.value = row.id;
     isEditingClientRows.value = true;
+    clientDataRowsTemp.set(row.id, {
+        original: row.original.value,
+        changed: null
+    });
+    console.log(clientDataRowsTemp);
 }
 function cancelEditClientRow(row) {
     editedClientRow.value = null;
@@ -97,9 +102,39 @@ function cancelEditClientRow(row) {
 const clientDataRowsTemp = new Map
 
 function clientDataRowChange(row, value) {
-    console.log(row)
+    const currentRow = clientDataRowsTemp.get(row.id);
+    clientDataRowsTemp.set(row.id, {
+        original: currentRow.original,
+        changed: value
+    });
+    console.log(clientDataRowsTemp.get(row.id));
     // clientDataRowsTemp.set(row.id, row);
     // console.log(clientDataRowsTemp.get(row.id));
+    clientDataRowsTemp.forEach((row) => {
+        if (row.original !== row.changed) {
+            toast.add({
+                title: "Masz niezapisane zmiany!",
+                description: "Zapisz zmiany naciskając przycisk.",
+                color: "info",
+                duration: 0,
+                close: false,
+                id: 67,
+                actions: [
+                    {
+                        icon: 'lucide:save',
+                        label: 'Save'
+                    },
+                    {
+                        icon: "lucide:undo-2",
+                        label: 'Undo'
+                    }
+                ]
+            });
+        } else {
+            console.log('close')
+            toast.remove(67)
+        }
+    })
 }
 const projectItems = computed(() => {
     if (!projectData.value?.items) return [];
