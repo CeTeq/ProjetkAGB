@@ -76,66 +76,69 @@ const clientDataColumns = [
     },
 ];
 
-const isEditingClientRows = ref(false)
-const editedClientRow = ref(null)
+const isEditingClientRows = ref(false);
 
-watch(isEditingClientRows, (isEditingClientRows) => {
-
-})
+watch(isEditingClientRows, (isEditingClientRows) => {});
 
 function editClientRowData(row) {
-    console.log('Edited row: ', row)
-    editedClientRow.value = row.id;
-    isEditingClientRows.value = true;
-    clientDataRowsTemp.set(row.id, {
+    console.log("Edited row: ", row);
+    clientDataRowsTemp.value.set(row.id, {
         original: row.original.value,
-        changed: null
+        changed: row.original.value,
     });
     console.log(clientDataRowsTemp);
 }
 function cancelEditClientRow(row) {
-    editedClientRow.value = null;
     isEditingClientRows.value = false;
-    clientDataRowsTemp.deleteRow(row.id);
+    clientDataRowsTemp.value.deleteRow(row.id);
 }
 
-const clientDataRowsTemp = new Map
+const clientDataRowsTemp = ref(new Map());
 
 function clientDataRowChange(row, value) {
-    const currentRow = clientDataRowsTemp.get(row.id);
-    clientDataRowsTemp.set(row.id, {
+    const currentRow = clientDataRowsTemp.value.get(row.id);
+    clientDataRowsTemp.value.set(row.id, {
         original: currentRow.original,
-        changed: value
+        changed: value,
     });
-    console.log(clientDataRowsTemp.get(row.id));
-    // clientDataRowsTemp.set(row.id, row);
-    // console.log(clientDataRowsTemp.get(row.id));
-    clientDataRowsTemp.forEach((row) => {
-        if (row.original !== row.changed) {
-            toast.add({
-                title: "Masz niezapisane zmiany!",
-                description: "Zapisz zmiany naciskając przycisk.",
-                color: "info",
-                duration: 0,
-                close: false,
-                id: 'clientDataUnsaved',
-                actions: [
-                    {
-                        icon: 'lucide:save',
-                        label: 'Save'
-                    },
-                    {
-                        icon: "lucide:undo-2",
-                        label: 'Undo'
-                    }
-                ]
-            });
+    console.log(clientDataRowsTemp.value.get(row.id));
+    console.log(clientDataRowsTemp.value.has(row.id));
+    // clientDataRowsTemp.value.set(row.id, row);
+    // console.log(clientDataRowsTemp.value.get(row.id));
+    clientDataRowsTemp.value.forEach((entry, id) => {
+        if (entry.original !== entry.changed) {
+            isEditingClientRows.value = true;
         } else {
-            console.log('close')
-            toast.remove('clientDataUnsaved')
+            clientDataRowsTemp.value.delete(id);
+            isEditingClientRows.value = false;
+            console.log("equals", clientDataRowsTemp.value);
         }
-    })
+    });
 }
+
+watch(clientDataRowsTemp.value, (e) => {
+    if (e.size === 0) toast.remove("clientDataUnsaved");
+    else {
+        toast.add({
+            title: "Masz niezapisane zmiany!",
+            description: "Zapisz zmiany naciskając przycisk.",
+            color: "info",
+            duration: 0,
+            close: false,
+            id: "clientDataUnsaved",
+            actions: [
+                {
+                    icon: "lucide:save",
+                    label: "Save",
+                },
+                {
+                    icon: "lucide:undo-2",
+                    label: "Undo",
+                },
+            ],
+        });
+    }
+});
 const projectItems = computed(() => {
     if (!projectData.value?.items) return [];
     const items = [];
@@ -612,6 +615,7 @@ const activeDesktopTab = ref("items");
                                 :columns="clientDataColumns"
                                 class="w-full"
                                 :ui="{
+                                    base: 'table-fixed w-full',
                                     thead: 'sticky top-0 bg-background z-10',
                                     th: 'px-6 py-3 text-xs font-semibold uppercase tracking-wide text-muted',
                                     td: 'px-6 py-4',
@@ -620,15 +624,25 @@ const activeDesktopTab = ref("items");
                             >
                                 <template #value-cell="{ row }">
                                     <div @click="editClientRowData(row)">
-                                        <div v-if="editedClientRow === row.id">
-                                            <UInput v-model="row.original.value" @update:modelValue="clientDataRowChange(row, row.original.value)"></UInput>
+                                        <div
+                                            v-if="
+                                                clientDataRowsTemp.has(row.id)
+                                            "
+                                        >
+                                            <UInput
+                                                v-model="row.original.value"
+                                                @update:modelValue="
+                                                    clientDataRowChange(
+                                                        row,
+                                                        row.original.value,
+                                                    )
+                                                "
+                                            ></UInput>
                                         </div>
                                         <div v-else>
                                             {{ row.original.value || "—" }}
                                         </div>
-
                                     </div>
-
                                 </template>
                             </UTable>
                         </div>
