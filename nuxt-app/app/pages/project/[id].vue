@@ -118,7 +118,7 @@ function clientDataRowChange(row, value) {
                 color: "info",
                 duration: 0,
                 close: false,
-                id: 67,
+                id: 'clientDataUnsaved',
                 actions: [
                     {
                         icon: 'lucide:save',
@@ -132,7 +132,7 @@ function clientDataRowChange(row, value) {
             });
         } else {
             console.log('close')
-            toast.remove(67)
+            toast.remove('clientDataUnsaved')
         }
     })
 }
