@@ -78,22 +78,26 @@ const clientDataColumns = [
 
 const isEditingClientRows = ref(false);
 
-watch(isEditingClientRows, (isEditingClientRows) => {
-
-});
+watch(isEditingClientRows, (isEditingClientRows) => {});
 const inputRefs = ref({});
 
 async function editClientRowData(row) {
+    if (clientDataRowsTemp.value.has(row.id)) return;
+
+    for (const [id, entry] of clientDataRowsTemp.value) {
+        if (!didClientRowChangeValue(entry))
+            clientDataRowsTemp.value.delete(id);
+    }
     console.log("Edited row: ", row);
     clientDataRowsTemp.value.set(row.id, {
         original: row.original.value,
         changed: row.original.value,
     });
     console.log(clientDataRowsTemp);
-    await nextTick()
+    await nextTick();
     inputRefs.value[row.id]?.inputRef?.focus();
 }
-    function cancelEditClientRow(row) {
+function cancelEditClientRow(row) {
     isEditingClientRows.value = false;
     clientDataRowsTemp.value.delete(row.id);
 }
@@ -112,30 +116,42 @@ function clientDataRowChange(row, value) {
     // console.log(clientDataRowsTemp.value.get(row.id));
 }
 function didClientRowChangeValue(row) {
-    if (!row) return false
-    return row.original !== row.changed
+    if (!row) return false;
+    return row.original !== row.changed;
 }
 function edittecOutOfFocus(row) {
-    const entry = clientDataRowsTemp.value.get(row.id)
-    if (!didClientRowChangeValue(entry)) clientDataRowsTemp.value.delete(row.id);
-    console.log(entry)
+    const entry = clientDataRowsTemp.value.get(row.id);
+    if (!didClientRowChangeValue(entry))
+        clientDataRowsTemp.value.delete(row.id);
+    console.log(entry);
 }
 const isClientDataUnsavedToastOpen = ref(false);
+let hideToastTimeout = null;
+
 watch(clientDataRowsTemp.value, (e) => {
     if (e.size === 0) {
-        toast.remove("clientDataUnsaved");
-        isClientDataUnsavedToastOpen.value = false;
-    }
-    else {
+        clearTimeout(hideToastTimeout);
+        hideToastTimeout = setTimeout(() => {
+            if (
+                clientDataRowsTemp.value.size === 0 &&
+                !isEditingClientRows.value
+            ) {
+                toast.remove("clientDataUnsaved");
+                isClientDataUnsavedToastOpen.value = false;
+            }
+        }, 200);
+    } else {
+        clearTimeout(hideToastTimeout);
         clientDataRowsTemp.value.forEach((entry, id) => {
             if (didClientRowChangeValue(entry)) {
-                // isEditingClientRows.value = true;
+                isClientDataUnsavedToastOpen.value = true;
+                isEditingClientRows.value = true;
             } else {
                 // clientDataRowsTemp.value.delete(id);
                 // isEditingClientRows.value = false;
                 console.log("equals", clientDataRowsTemp.value);
             }
-        })
+        });
         if (!isClientDataUnsavedToastOpen.value) {
             toast.add({
                 title: "Masz niezapisane zmiany!",
@@ -154,7 +170,6 @@ watch(clientDataRowsTemp.value, (e) => {
                         label: "Undo",
                     },
                 ],
-                
             });
             isClientDataUnsavedToastOpen.value = true;
         }
@@ -445,7 +460,43 @@ const activeDesktopTab = ref("items");
                             <UTable
                                 :data="clientDataRows"
                                 :columns="clientDataColumns"
-                            ></UTable>
+                                :ui="{
+                                    base: 'table-fixed w-full',
+                                }"
+                            >
+                                <template #value-cell="{ row }">
+                                    <div @click="editClientRowData(row)">
+                                        <div
+                                            v-if="
+                                                clientDataRowsTemp.has(row.id)
+                                            "
+                                        >
+                                            <UInput
+                                                :ref="
+                                                    (el) =>
+                                                        (inputRefs[row.id] = el)
+                                                "
+                                                v-model="row.original.value"
+                                                @update:modelValue="
+                                                    clientDataRowChange(
+                                                        row,
+                                                        row.original.value,
+                                                    )
+                                                "
+                                                @focusout="
+                                                    edittecOutOfFocus(row)
+                                                "
+                                                @focusin="
+                                                    focusedClientDataRow = row
+                                                "
+                                            ></UInput>
+                                        </div>
+                                        <div v-else>
+                                            {{ row.original.value || "—" }}
+                                        </div>
+                                    </div>
+                                </template>
+                            </UTable>
                         </div>
                     </template>
                 </UTabs>
@@ -651,7 +702,10 @@ const activeDesktopTab = ref("items");
                                             "
                                         >
                                             <UInput
-                                                :ref="(el) => (inputRefs[row.id] = el)"
+                                                :ref="
+                                                    (el) =>
+                                                        (inputRefs[row.id] = el)
+                                                "
                                                 v-model="row.original.value"
                                                 @update:modelValue="
                                                     clientDataRowChange(
@@ -659,7 +713,9 @@ const activeDesktopTab = ref("items");
                                                         row.original.value,
                                                     )
                                                 "
-                                                @focusout="edittecOutOfFocus(row)"
+                                                @focusout="
+                                                    edittecOutOfFocus(row)
+                                                "
                                             ></UInput>
                                         </div>
                                         <div v-else>
